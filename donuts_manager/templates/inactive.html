@@ -1,0 +1,42 @@
+<html>
+  <head>
+  <title> donuts - Unauthorized</title>
+  
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon"/> 
+    <link type="text/css" rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700">
+    <link type="text/css" rel="stylesheet" href="/fonts.googleapis.com/css?family=Oswald:400,700,300">
+    <link href="//cdn.corpam.com.ar/bootstrap/stable/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//cdn.corpam.com.ar/bootstrap/stable/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
+  
+    <script src="//cdn.corpam.com.ar/common/stable/js/jquery.min.js"></script>
+
+  </head>
+  <body>
+  <div id="unauth">
+    <div class="banner" style="background-image: url('{{ url_for('static', filename="img/unauthorized.jpg") }}');">
+        <!-- <img class="logo" src='{{ url_for('static', filename="img/logo.png") }}' aria-hidden="true"/> -->
+    </div>
+    <div class="info">
+        <div class="account box-content right">
+            <div class="signed">You are signed in as:</div>
+            <div class="profile">
+                <img src="{{ session.user.avatar }}" aria-hidden="true">
+                <div class="details">
+                    <p class="display">{{ session.user.displayname }}</p>
+                    <p class="email">{{ session.user.email }}</p>
+                </div>
+                <a class="logout" href="{{ url_for('mavapa.logout') }}">Sign out</a>
+            </div>
+        </div>
+        <div class="divider-vert"></div>
+        <div class="message">
+            <p class="title">Sorry!</p>
+            <p class="content">This is a restricted area and your account is not authorized to use this application.</p>
+        </div>
+    </div>
+</div>
+{% include 'footer.html'%}
+</body>
+</html>

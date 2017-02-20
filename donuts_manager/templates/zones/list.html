@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block js %}
+<script>
+{% include 'libs.js' %}
+{% include 'zones/libs.js' %}
+var ZONE = null;
+var PAGECLASS = 'refreshZones';
+function table_height() {
+    return $('#page').height();
+};
+function nameFormatter(value){
+    var url = "{{url_for('zone_page', zone='zone-name')}}";
+    url = url.replace('zone-name', value);
+    var link = '<a href="' + url + '" > ' + value + '</a>';
+    return link;
+}
+
+function actionsFormatter(value){
+    var html = '<a href="#" class="addRecord" data-zoneid="';
+    html += value;
+    html +='"><i class="fa fa-plus"/></a>';
+    return html;
+}
+
+function refreshZones(){
+    var PAGECLASS = 'refreshZones';
+    loading();
+    $.get("{{url_for('show_zones')}}", function(data, status){
+
+        ALL_ZONES = data['data']['zones'];
+	var columns = [
+	    {
+		'field': 'name',
+		'title': 'Name',
+		'formatter': nameFormatter
+	    },
+	    {
+		'field': 'published',
+		'title': '#Changes',
+	    },
+	    {
+		'field': 'name',
+		'title': 'Actions',
+		'formatter': actionsFormatter
+	    },
+
+	];
+	var sel = '#' + 'zonesTable';
+	$(sel).bootstrapTable('destroy');
+	$(sel).html('');
+
+	$(sel).bootstrapTable({
+            data: ALL_ZONES,
+	    columns: columns
+	});
+	$('#showZonesWindow').show();
+        //makeBootstrapTable('#zonesTable');
+        autoSearch();
+        window.history.pushState('index', 'index', "{{url_for('zones_list')}}");
+	$('#zonesTable').on('post-body.bs.table', function () {
+            jqlistens();
+	});
+        jqlistens();
+	loadingDone();
+    });
+}
+
+
+function jqlistens(){
+    $(".addRecord").click(function() {
+	addRecord($(this).data('zoneid'));
+    });
+
+};
+function autosize_tables() {
+    var tables = $('body').find(".table-autosize");
+    tables.each(function(row){
+	var selector = $(tables[row]).attr('id');
+	selector = '#' + selector;
+	$(selector).on('post-body.bs.table', function () {
+	    
+	});
+	$(selector).bootstrapTable({
+	    height: table_height(selector),
+	});
+	$(selector).bootstrapTable('resetView', {
+	    height: table_height(selector),
+	});	    
+    });
+}
+function table_height(table) {
+    var parent = $(table).parent().parent().parent().parent();
+    return parent.height();
+};
+
+function autoSearch(){
+	if (ALL_ZONES.length == 0){
+		getZones();
+	}
+	var $input = $('#search');
+	$input.typeahead({'source': ALL_ZONES}).change(function(){
+		var current = $input.typeahead("getActive");
+		console.log(current);
+		var zone = current['name'];
+		showZone(zone);
+	});
+}
+$( document ).ready(function() {	
+    refreshZones();
+    autosize_tables();
+
+
+    $(".showZonesMain").click(function() {
+	refreshZones();
+	autosize_tables();
+    });
+
+    $('#btnCloseRecord').on('click', function(event){
+	hideAddRecordModal();
+	refreshZones();
+	autosize_tables();
+	event.preventDefault();
+    });
+    autoSearch();
+
+    $('#btnAddRecord').on('click', function(event){
+	event.preventDefault();
+	sendAddRecord(event);
+    });
+
+});
+</script>
+{% endblock %}
+
+{% block main %}
+<div id='main-content'>
+  <div id="showZonesWindow" class="main-window"  style='display:none'>
+    <div class=" sub-content panel panel-default m-content">
+      <table id='zonesTable'
+	     data-show-toggle="false"
+	     data-show-export="false"
+	     data-show-columns="true" data-show-multi-sort="true"
+	     data-sort-name="name" data-pagination="true"
+	     data-toggle="table" data-search="true"
+	     data-toolbar="#toolbar-user"
+	     data-show-footer="false"
+	     data-page-size="15"
+	     data-escape="false"
+	     class="table table-hover table-striped table-compact 
+		    table-condensed table-autosize"
+	     cellspacing="0">
+      </table>
+    </div>
+  </div>
+  
+</div> 	
+
+
+
+
+{% endblock %}
+
+{% block modals %} 
+
+    {% include "zones/modals/add_record.html" %}
+    {% include "zones/modals/edit_record.html" %}
+    {% include "zones/modals/expiration_modal.html" %}
+{% endblock%}

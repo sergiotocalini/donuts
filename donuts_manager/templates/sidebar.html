@@ -1,0 +1,88 @@
+<nav id="sidebar" class="navbar-default navbar-static-side" data-position="right" data-intro="Template has <b>many navigation styles</b>" data-step="2" role="navigation" style="min-height: 88%;">
+
+  	<div class="sidebar-collapse menu-scroll">
+
+  		<ul id="side-menu" class="nav">
+  			<div class="clearfix"></div>
+  			<li class="{% if ctx.app_name == 'dashboard' %} active{%endif%} menu-link" data-app='Dashboard'>
+  			  <a href="{{url_for('index')}}">
+  			    <i class="fa fa-bar-chart fa-fw">
+  			    </i>
+  			    <span class="menu-title">Home</span>
+  			  </a>
+  			</li>
+			
+			<li class="{% if ctx.app_name == 'index'%}showZonesMain active{%endif%} menu-link" data-app='ShowZones'>
+  			  <a href="{{url_for('zones_list')}}">
+  			    <i class="fa fa-list fa-fw">
+  			    </i>
+  			    <span class="menu-title">Zones</span>
+  			  </a>
+  			</li>
+
+			{% if session.user.admin %}
+			<li id="addZone" >
+			  <a  href="#"> 
+                            <i class="fa fa-plus fa-fw"></i>
+			    <span class="menu-title">Add Zone</span>
+			  </a>
+			</li>
+			{% endif %}
+  			<li class="{% if ctx.app_name == 'to_publish'%}active{%endif%} menu-link" data-app='ToPublish'>
+  			  <a href="{{url_for('zone_to_publish')}}">
+  			    <i class="fa fa-arrow-up fa-fw">
+  			    </i>
+  			    <span class="menu-title">Unpublished</span>
+  			  </a>
+  			</li>
+			<li class="{% if ctx.app_name == 'Published' %}active{%endif%} menu-link" data-app='Published'>
+  			  <a href="{{url_for('published')}}">
+  			    <i class="fa fa-history fa-fw">
+  			    </i>
+  			    <span class="menu-title">Logs</span>
+  			  </a>
+  			</li>
+
+			{% if session.user.expirations or session.user.admin%}
+			<li class="{% if ctx.app_name == 'expirations_list'%}active{%endif%} menu-link" data-app='Expirations'>
+			  <a href="{{url_for('expirations_list')}}">
+			    <i class="fa fa-calendar fa-fw">
+			    </i>
+			    <span class="menu-title">Expirations</span>
+			  </a>
+			</li>
+			{% endif %}
+  			{% if session.user.admin %}
+  			<li class="{% if ctx.app_name == 'search'%}active{%endif%} menu-link" data-app='AdvancedSearch'>
+  			  <a href="{{url_for('advanced_search')}}">
+  			    <i class="fa fa-search fa-fw">
+  			    </i>
+  			    <span class="menu-title">Search</span>
+  			  </a>
+  			</li>
+  			<li class="{% if ctx.app_name == 'admin'%}active{%endif%} menu-link" data-app='UsersAdmin'>
+			  <a href="{{url_for('admin')}}">
+  			    <i class="fa fa-user fa-fw">
+  			    </i>
+  			    <span class="menu-title">Users</span>
+  			  </a>
+  			</li>
+  			<li class="{% if ctx.app_name == 'dns_servers'%}active{%endif%} menu-link" data-app='DnsServers'>
+  			  <a href="{{url_for('dns_servers')}}">
+  			    <i class="fa fa-user-secret fa-fw">
+  			    </i>
+  			    <span class="menu-title">Agents</span>
+  			  </a>
+  			</li>
+  			<li class="{% if ctx.app_name == 'ddns_admin'%}active{%endif%} menu-link" data-app='DynamicDns'>
+  			  <a href="{{url_for('ddns_admin')}}">
+  			    <i class="fa fa-exchange fa-fw">
+  			    </i>
+  			    <span class="menu-title">Dynamic Dns</span>
+  			  </a>
+  			</li>
+
+  			{% endif %}
+  	</ul>
+  </div>
+</nav>

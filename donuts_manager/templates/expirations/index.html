@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block js%}
+{% endblock%}
+
+
+{% block main %}
+
+
+	<nav class="sub-bar navbar navbar-custom">
+	  <div class="row container">
+	    <!-- Brand and toggle get grouped for better mobile display -->
+		    <div class="navbar-header col-md-4">
+		    {% if session.user.admin or session.user.expirations%}
+		    	<a href="{{url_for('expiration_search')}}"  id='bulk-edit-zones' class=" btn btn-primary  navbar-btn " >Search</a>
+		    {% endif %}
+		    </div>
+
+		    <!-- Collect the nav links, forms, and other content for toggling -->
+		    <div class='navbar-header col-md-8'>
+	    		<div class='row'>
+
+				</div>
+
+
+			</div>
+		
+	  </div><!-- /.container-fluid -->
+	</nav>
+	<div class="m-content panel panel-default">
+		<table id="Table" 
+			class="table table-compact table-striped table-hover " cellspacing="0">
+					
+			<thead>
+	    		<tr>
+	      			<th>Zone</th>
+	      			<th>Account</th>
+	      			<th>Owner</th>
+	      			<th>Mail</th>
+	      			<th>Expire</th>
+				</tr>
+			</thead>
+		<tbody >
+		{% for zone in ctx.expirations %}
+				<tr class='{{zone['level']}}'>
+					<td>
+						<a href="{{url_for('expiration_search')}}?search_by={{zone['zone']}}">{{zone['zone']}}</a>
+					</td>
+					<td>
+						{{zone['account']}}
+					</td>
+					<td>
+						{{zone['owner']}}
+					</td>
+					<td>
+						{{zone['owner_mail']}}
+					</td>
+					<td>
+						{% if zone.expiration %}
+							{{zone['expiration_human']}} ({{zone['expiration'].date()}})
+						{% else %}
+							empty
+						{% endif %}
+					</td>
+
+				</tr>
+
+		{% endfor%}
+		</tbody>
+		</table>
+	</div>
+
+{% endblock %}

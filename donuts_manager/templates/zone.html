@@ -1,0 +1,58 @@
+<div id="showZoneWindow" class='main-window' style='display:none' >
+
+	<nav class="sub-bar navbar navbar-custom">
+		<div class="container-fluid">
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class="navbar-header col-md-4">
+				<button onclick="location.href='{{url_for('zone_to_publish')}}?zone=%%ZONE_ID%%'" id='zone-to-publish' 
+				type="button" class=" publish btn btn-success  navbar-btn  " 
+				id='zone-to-publish-button' >
+					<i class="fa fa-arrow-up"></i> To Publish
+				</button>
+				<button  data-zoneid="%%ZONE_ID%%" type="button" class=" btn btn-primary  navbar-btn addRecord ">
+					<i class="fa fa-plus"></i>     		Add Record
+				</button> 
+			</div>
+			<div class='col-md-4'></div>
+
+			{% if session.user.admin %}
+			<div class='col-md-1'>
+				<button  id='expiration-btn' data-zoneid="%%ZONE_ID%%" type="button" class="pull-right btn btn-danger  navbar-btn  "> 
+				 Expiration Form
+				</button> 
+			</div>
+			<div class='col-md-1'>
+				<button  data-zoneid="%%ZONE_ID%%" type="button" class=" pull-right btn btn-danger  navbar-btn delZone "> 
+					<i class='fa fa-trash'></i> Delete Zone
+				</button> 
+			</div>
+			{% endif %}
+
+		</div><!-- /.container-fluid -->
+	</nav>
+
+
+
+	<div  id="items" class=" sub-content tab-pane fade in active m-content">
+     	<div class="panel panel-default">
+			<table id="recordsTable" 0
+ 				class="table table-hover table-striped table-compact table-condensed">
+				<thead>
+		    		<tr>
+		      			<th>record</th>
+		      			<th>type</th>
+		      			<th>value</th>
+		      			<th>ttl</th>
+		      			<th>actions</th>
+		   	 		</tr>
+		  		</thead>
+		  		<tbody id='%%TBODY%%'>
+		  		</tbody>
+			</table>
+		</div>
+	</div>
+
+	
+</div>
+
+

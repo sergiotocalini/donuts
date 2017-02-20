@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block js %}
+<script>
+function changeCheckboxes(value){
+    var testimonialElements =  $('.action-checkbox');	
+	for(var i=0; i<testimonialElements.length; i++){
+		var element = testimonialElements.eq(i);
+		element.prop('checked', value);
+	} 
+	if (value == false){
+		$('#bulk-edit-zones').addClass('disabled');
+	}
+}
+	$( document ).ready(function() {
+		$('#bulk-edit-zones').click(function() {
+    		var testimonialElements =  $('.action-checkbox');
+    		var outdata = [];
+			for(var i=0; i<testimonialElements.length; i++){
+				var element = testimonialElements.eq(i);
+				if(element.prop('checked')){
+					var tdata = element.attr('id').split('/');
+					var data = {'zone': tdata[0], 'record': tdata[1]};
+					data['type'] = tdata[2];
+					data['value'] = tdata[3];
+					data['ttl'] = tdata[4];
+					outdata.push(data);
+				}
+			}
+
+			var url = '{{url_for('bulk_edit')}}';
+			$.post(url, {
+		        contentType: 'application/json',
+        		data: JSON.stringify(outdata),
+		        dataType: 'json'},
+  					function(data){
+  						$('#bulkModal').modal('show');
+  						$('#bulkModal').on('shown.bs.modal', function() {
+						    $('#bulkModal').find('.modal-body').append(data);
+						});
+
+					}
+			);
+		});
+		$('.action-checkbox').click(function(){
+			var checked = false;
+			var testimonialElements =  $('.action-checkbox');	
+			for(var i=0; i<testimonialElements.length; i++){
+				var element = testimonialElements.eq(i);
+				var val = element.prop('checked');
+				if (val){
+					checked = true;
+				}
+			}
+			if (checked){
+	    		$('#bulk-edit-zones').removeClass('disabled');
+			}else{
+				$('#bulk-edit-zones').addClass('disabled');
+			}
+		});
+		$('#main-checkbox').click(function() {
+	    	var $this = $('#main-checkbox');
+    		// $this will contain a reference to the checkbox   
+    		$('#bulk-edit-zones').removeClass('disabled');
+    		if ($this.prop('checked')) {
+    		    console.log('checked!');	
+
+    		    changeCheckboxes(true);
+    
+	    	} else {
+    		    changeCheckboxes(false);
+    		}
+		});
+	});
+</script>
+{% endblock %}
+      {% block search_nav %}
+      {%endblock %}
+      
+{% block main_menu %}
+<li class=" showZonesMain"><a href="{{url_for('index')}}">Home</a></li>
+{% endblock %}
+{% block main %}
+
+	<nav class="sub-bar navbar navbar-custom">
+	  <div class="container">
+	    <!-- Brand and toggle get grouped for better mobile display -->
+	    <div class="navbar-header col-md-3">
+	      {% if ctx.found%}
+			<button type="button"  id='bulk-edit-zones' class=" btn btn-primary  navbar-btn disabled" >Mass update</button>
+	      {% endif %}
+	      </li>
+	    </div>
+
+	    <!-- Collect the nav links, forms, and other content for toggling -->
+	    <div class="navbar-search navbar-collapse col-md-8" > 
+	      	<form class="navbar-form " role="search">
+				<div class='row'>
+	    	    	<div class="form-group navbar-search-fgroup ">
+	        	    	<input name='search_by' type="text" class="navbar-search-input form-control" placeholder='Search' value='{{ctx.search}}'>
+	        		</div>
+		        </div>
+	      	</form>
+		</div><!-- /.navbar-collapse --> 
+
+		
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+
+
+
+
+ <div class='m-content'>
+		{% if ctx.found%}
+			<table id="Table" class="table table-compact table-striped table-hover table-bordered table-condensed table-compact table-nowrap" cellspacing="0">
+			 <thead>
+			    <tr>
+			    	<th> <input id='main-checkbox' type="checkbox" />  </th>
+			      	<th>record</th>
+			      	<th>zone</th>
+			      	<th>type</th>
+			      	<th>value</th>
+			      	<th>ttl</th>
+			    </tr>
+			  </thead>
+			  <tbody>
+				{% for r in ctx.found%}
+				<tr> 
+					<td >
+						<input class='action-checkbox' 
+							id='{{r.zone}}/{{r.record}}/{{r.record_type}}/{{r.record_value}}/{{r.ttl}}'
+							type="checkbox" /> 
+					</td>
+					<td> {{r.record}}.{{r.zone}} </td>						
+					<td> <a href='{{url_for('zones_list')}}?zone={{r.zone}}'> {{r.zone}} </a></td>
+					<td> {{r.record_type}} </td>
+					<td> {{r.record_value}} </td>
+					<td> {{r.ttl}} </td>
+				</tr>
+				{% endfor %}
+			  </tbody>
+			</table>
+
+		{%endif%}
+	</div>
+
+
+
+
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade bs-example-modal-lg" id="bulkModal" 
+	tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+    	<div class="modal-content">
+        		<div class="modal-body">
+        		</div>
+      	</div>
+    </div>
+</div> 
+{% endblock %}

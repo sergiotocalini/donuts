@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block js %}
+<script>
+$(document).ready(function(){
+	var ALL_ZONES = {{ctx.zones|tojson|safe}};
+	var $input = $('#search_by');
+	$input.typeahead({'source': ALL_ZONES}).change(function(){
+		var current = $input.typeahead("getActive");
+
+		var zone = current['name'];
+		var url = "{{url_for('expiration_search')}}?search_by=" + zone;
+		window.location.replace(url);
+	});
+
+});
+</script>
+{% endblock %}
+      {% block search_nav %}
+      {%endblock %}
+      
+
+{% block main %}
+
+
+	<nav class="sub-bar navbar navbar-custom">
+	  <div class="container">
+	    <!-- Brand and toggle get grouped for better mobile display -->
+	    <div class="navbar-header col-md-3">
+	    	<a href="{{url_for('expirations_list')}}"  id='bulk-edit-zones' class=" btn btn-primary  navbar-btn" >Back</a>
+	    </div>
+
+	    <!-- Collect the nav links, forms, and other content for toggling -->
+	    <div class="navbar-search navbar-collapse col-md-8" > 
+	      	<form class="navbar-form " role="search">
+				<div class='row'>
+	    	    	<div class="form-group navbar-search-fgroup ">
+	        	    	<input name='search_by' id='search_by' type="text" class="navbar-search-input form-control" placeholder='Search' value='{{ctx.search}}' data-provide="typeahead"  autocomplete="off">
+	        		</div>
+		        </div>
+	      	</form>
+		</div><!-- /.navbar-collapse --> 
+
+		
+	  </div><!-- /.container-fluid -->
+	</nav>
+
+
+
+
+
+<div class='m-content'>
+{% if ctx.zone %}
+	<br/>
+		<form class="form-horizontal" name="commentform"  id="expirationForm" method="post">
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="expiration">Expiration</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="expiration" name="expiration" value="{{ctx.zone.expiration}}"/>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="account">Account</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="account" name="account" value="{{ctx.zone.account}}"/>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="owner">Owner</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="owner" name="owner" value="{{ctx.zone.owner}}"/>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="mail">Owner mail</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="mail" name="mail" value="{{ctx.zone.owner_mail}}" />
+		    </div>
+		  </div>
+		<div class="form-group">
+		  <label class="control-label col-md-4" for="comment">Comments:</label>
+		  <div class="col-md-6">
+		  	<textarea class="form-control" rows="5" name="comments" id="comments">{{ctx.zone.comments}}</textarea>
+		  </div>
+		</div>
+
+		  <div class="form-group">
+		    <div class="col-md-4"></div>
+		    <div class="col-md-6">
+		      <button type="submit" value="Submit" data-zone='{{ctx.zone.zone}}' id="ExpirationFormSubmit" class="btn btn-custom pull-right">Submit</button>
+		    </div>
+		  </div>
+		  </form>
+
+<script>
+$(function () {
+      $('#expiration').datepicker({format: 'dd/mm/yyyy'});
+});
+$('#ExpirationFormSubmit').click(function(event){
+	event.preventDefault();
+  	var zone = $(this).data('zone');
+
+  	var url = '{{url_for('zone_expiration')}}?zone=' + zone;
+  	var data = {};
+	$("#expirationForm").serializeArray().map(function(x){data[x.name] = x.value;});
+	if (data['expiration'] != '' && data['mail'] != '' && data['owner'] != ''){
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: data,
+			success: function(response){
+				var url = "{{url_for('expirations_list')}}";
+				window.location.replace(url);
+			}
+
+		})
+		console.log(data);
+		console.log(url);
+	}
+
+});
+</script>
+
+{% endif %}
+</div>
+
+
+
+
+{% endblock %}
+
+{% block modals %}
+<div class="modal fade bs-example-modal-lg" id="bulkModal" 
+	tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+    	<div class="modal-content">
+        		<div class="modal-body">
+        		</div>
+      	</div>
+    </div>
+</div> 
+{% endblock %}

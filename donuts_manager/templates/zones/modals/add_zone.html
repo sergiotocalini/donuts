@@ -1,0 +1,37 @@
+<!-- Start AddZoneModal -->
+<div id="AddZoneModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width: 400">
+    <div class="modal-content">
+      <div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+	<form class="form-horizontal" name="commentform"  id="addZoneForm" method="post">
+	  <div class="form-group">
+	    <label class="control-label col-md-4" for="zone_name">Zone Name</label>
+	    <div class="col-md-6">
+	      <input type="text" class="form-control" id="zone_name" name="zone_name" placeholder="Zone Name"/>
+	    </div>
+	  </div>
+	  <div class="form-group">
+	    <label class="control-label col-md-4" for="view">View</label>
+	    <div class="col-md-6" >
+	      <select  class=" form-control" id="view" name="view" >
+		<option>public</option>
+		<option>private</option>
+	      </select>
+	    </div>
+	  </div>
+
+	  <div class="form-group">
+	    <div class="col-md-5"></div>
+	    <div class="col-md-6">
+	      <button type="submit" value="Submit"  id="addZoneFormSubmit" class="btn btn-primary pull-right">Submit</button>
+	    </div>
+	  </div>
+	  </form>
+      </div><!-- End of AddZoneModal body -->
+    </div><!-- End of AddZoneModal content -->
+  </div><!-- End of AddZoneModal dialog -->
+</div><!-- End of AddZoneModal -->
+

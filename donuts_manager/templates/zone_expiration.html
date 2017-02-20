@@ -1,0 +1,70 @@
+
+		<form class="form-horizontal" name="commentform"  id="expirationForm" method="post">
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="expiration">Expiration</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="expiration" name="expiration" value="{{ctx.zone.expiration}}"/>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="account">Account</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="account" name="account" value="{{ctx.zone.account}}"/>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="owner">Owner</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="owner" name="owner" value="{{ctx.zone.owner}}"/>
+		    </div>
+		  </div>
+		  <div class="form-group">
+		    <label class="control-label col-md-4" for="mail">Owner mail</label>
+		    <div class="col-md-6">
+		      <input type="text" class="form-control" id="mail" name="mail" value="{{ctx.zone.owner_mail}}" />
+		    </div>
+		  </div>
+		<div class="form-group">
+		  <label class="control-label col-md-4" for="comment">Comments:</label>
+		  <div class="col-md-6">
+		  	<textarea class="form-control" rows="5" name="comments" id="comments">{{ctx.zone.comments}}</textarea>
+		  </div>
+		</div>
+
+		  <div class="form-group">
+		    <div class="col-md-5"></div>
+		    <div class="col-md-6">
+		      <button type="submit" value="Submit" data-zone='{{ctx.zone.zone}}' id="ExpirationFormSubmit" class="btn btn-custom pull-right">Submit</button>
+		    </div>
+		  </div>
+		  </form>
+
+
+
+<script>
+$(function () {
+      $('#expiration').datepicker({format: 'dd/mm/yyyy'});
+});
+$('#ExpirationFormSubmit').click(function(event){
+	event.preventDefault();
+  	var zone = $(this).data('zone');
+
+  	var url = '{{url_for('zone_expiration')}}?zone=' + zone;
+  	var data = {};
+	$("#expirationForm").serializeArray().map(function(x){data[x.name] = x.value;});
+	if (data['expiration'] != '' && data['mail'] != '' && data['owner'] != ''){
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: data,
+			success: function(response){
+				$('#expirationModal').modal('hide');
+			}
+
+		})
+		console.log(data);
+		console.log(url);
+	}
+
+});
+</script>

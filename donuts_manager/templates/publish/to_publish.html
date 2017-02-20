@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block js%}
+<script>
+{% include 'libs.js' %}
+function showZone(zone){
+    var url = '{{url_for('index')}}?zone=' + zone;
+    window.location.href = url;
+}
+function changeCheckboxes(value){
+    var testimonialElements =  $('.action-checkbox');	
+    for(var i=0; i<testimonialElements.length; i++){
+	var element = testimonialElements.eq(i);
+	element.prop('checked', value);
+    }
+    
+}
+function publishAndRemove(url, ii){
+    console.log(url);
+    loading();
+    $.get(url, function(r){
+       	$('#' + ii).empty();
+	loadingDone();
+    });
+}
+function bulkUrl(murl, confirmationText){
+    var testimonialElements =  $('.action-checkbox');
+    var items = [];
+    
+    for(var i=0; i<testimonialElements.length; i++){
+	var element = testimonialElements.eq(i);
+	if (element.prop('checked')){
+	    var item_id = element.attr('id');
+	    item_id = item_id.replace('p_', '');
+	    items.push(item_id);
+	}
+    }
+    if (items.length > 0) {
+	bootbox.confirm(confirmationText, function(result) {
+	    if (result == true){
+		for (var i in items){
+		    var ii = items[i];
+		    var url = murl;
+		    url += ii;
+		    publishAndRemove(url, ii);
+		}
+	    }else{
+		
+	    }
+	});
+    }
+}
+$( document ).ready(function() {
+    changeCheckboxes(false);
+    autoSearch();
+    $('#main-checkbox').click(function() {
+	var $this = $('#main-checkbox');
+    	// $this will contain a reference to the checkbox   
+
+    	if ($this.prop('checked')) {
+    	    console.log('checked!');	
+	    
+    	    changeCheckboxes(true);
+	    
+	} else {
+    		    changeCheckboxes(false);
+    	}
+    });
+    $('.publish_this').click(function(event){
+	var url = $(this).attr('link');
+	
+	bootbox.confirm("Are you sure you want to publish this?", function(result) {
+	    if (result == true){
+		callUrlAndReload(url);	
+	    }else{
+		
+	    }
+	}); 
+	event.preventDefault();
+    })
+    $('.remove_this').click(function(event){
+	var url = $(this).attr('link');
+	bootbox.confirm("Are you sure you want to delete this?", function(result) {
+	    if (result == true){
+		callUrlAndReload(url);	
+	    }else{
+		
+	    }
+	}); 
+	event.preventDefault();
+    })
+    $('#bulk-publish').click(function(event){
+	bulkUrl("{{url_for('publish_this')}}?id=", "Are you sure you want to publish this?");
+	event.preventDefault();
+    })
+    $('#bulk-delete').click(function(event){
+	bulkUrl("{{url_for('publish_remove')}}?id=", "Are you sure you want to delete this?");
+	event.preventDefault();
+    })
+});	
+</script>
+{% endblock %}
+
+
+
+
+
+{% block main_menu %}
+{% endblock %}
+
+{% block main %}
+<nav class="sub-bar navbar navbar-custom">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header col-md-3">
+    {% if ctx.zone %}
+    <a type="button" href="{{url_for('zone_page', zone=ctx.zone)}}";
+        class=" btn btn-success  navbar-btn "> <i class="fa fa-arrow-left"></i> Back </a> 
+    {% endif %}
+
+      <button type="button" id="bulk-publish" class=" btn btn-success  navbar-btn "> <i class="fa fa-arrow-up"></i> Publish </button> 
+      <button type="button"  id='bulk-delete'  class=" btn btn-primary  navbar-btn "> <i class="fa fa-trash"></i> Delete </button> 
+    </div>
+
+</nav>
+
+{% if ctx.to_publish%}
+
+	   	<div class="m-content panel panel-default">
+			<table id="Table" class="table table-compact table-striped table-hover table-bordered table-condensed table-compact table-nowrap" cellspacing="0">
+		  <thead>
+	    	<tr>
+	      		<th><input id='main-checkbox' type="checkbox" /> </th>
+	      		<th></th>
+	      		<th>record</th>
+	      		<th> zone </th>
+	      		<th>user</th>
+	      		<th>description</th>
+	      		<th>Actions</th>	
+	    	</tr>
+	  	  </thead>
+	  	<tbody>
+	  {% for to_p in ctx.to_publish%}
+	  	<tr id="{{to_p._id}}">
+	  		<td ><input  class='action-checkbox' id='p_{{to_p._id}}'type="checkbox" /> </td>
+	  		<td>
+	  		{% if to_p.action == 'Add' %}
+				<i class="fa fa-plus"></i>
+			{% elif to_p.action == 'Edit' %}
+				<i class='fa fa-pencil'></i> 
+			{% elif to_p.action == 'Del' %}
+				<i class="fa fa-trash"></i>
+			{% else %}
+				{{to_p.action}}
+	  		{% endif %}
+	  		</td>
+	  		<td> {{to_p.record}}</td>
+	  			  		<td> {{to_p.zone}}</td>
+
+	  		<td> {{to_p.user.email}}</td>
+	  		<td> {{to_p.note}} </td>
+	  		<td> <a class='publish_this' href='#' link='{{url_for('publish_this')}}?id={{to_p._id}}'>
+	  			<i class="fa fa-arrow-up"></i>
+	  		 </a>  <a class='remove_this' href='#' link='{{url_for('publish_remove')}}?id={{to_p._id}}'>
+				<i class="fa fa-trash"></i>
+		  	</a> </td>
+
+	  	</tr>
+	 	 {%endfor%}
+	  	</tbody>
+		</table> 
+		</div>
+		{% else %}
+		<div class='row'>
+			<h2 class='text-center'> Nothing to publish </h2>
+		</div>	
+		{% endif %}
+
+{% endblock %}

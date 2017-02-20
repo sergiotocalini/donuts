@@ -1,0 +1,364 @@
+#main{
+	position: fixed;
+	z-index: 10;
+	width: 100% !important;
+	padding-left: 12%;
+	bottom: 6%;
+	top: 6%;
+	float: right;
+	height: 88% !important;
+}
+.modal{
+
+}
+.modal-open{
+
+}
+.navbar-header{
+	//padding-top: 0.5%;
+}
+.navbar-text {
+    float: left;
+    margin-left: 0;
+    margin-right: 0;
+    
+}
+#headerbar{
+	position: relative;
+	height: 6% !important;
+	width: 100% !important;
+
+    top: 0;
+    width: 100%;
+    z-index: 100;
+}
+.navbar-custom {
+	height: 4% !important;
+	background-color: #C0C0C0;
+	color:#ffffff;
+	position: relative;
+	margin-bottom: 0px !important;
+	width: 100% !important;
+	padding: 0 !important;
+
+}
+.m-content{
+	position: relative;
+	overflow-y: auto !important; 
+	height: 93% !important; 
+	width: 100% !important;
+}
+#page-content{
+	height: 88% !important;
+    width: 100%;
+    position: relative;
+    z-index: 4 !important;
+}
+.footer-bar {
+	position: relative;
+    bottom: 0;
+	height: 6% !important;
+	width: 100% !important;
+	border-top: 1px solid #E5E5E5;
+}
+
+html {
+  font-size: 62.5%;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  height: 100%;
+}
+body {
+  font-family: Ubuntu, Ubuntu Light, sans-serif;
+  font-size: 13px;
+  line-height: 1.42857143;
+  color: #999999;
+  /* background-color: #f0f2f5; */
+  height: 100%;
+  overflow-y:hidden;
+}
+
+.sub-bar{
+	height: 5% !important;
+}
+.navbar {
+    border: 0px solid transparent;
+    height: 7%;
+    margin-bottom: 0px !important;
+    min-height: 50px !important;
+    position: relative;
+}
+
+#wrapper {
+  width: 100%;
+  display: block;
+  height: 88% !important;
+  background-color: #3C3C3C;
+}
+#page-wrapper {
+  min-height: 100%;
+  padding: 0 !important;
+  margin: 0 !important;
+  background-color: #f0f2f5;
+  position: relative;
+  float:left;
+  width: 85%;
+
+}
+
+
+#page {
+	margin-top: 0 !important;
+}
+
+
+.navbar-input-group {
+  
+}
+
+.navbar-form-input2{
+	margin-top: 12px !important;
+}
+#search-zone{
+		margin-top: 12px !important;
+		color: black;
+}
+.navbar-input-group input {
+
+}
+.navbar-input-group .btn {
+
+}
+.navbar-form2{
+	height: 30px !important;
+	width: 100px !important;
+}
+
+.home-logo{
+	height: 25px !important;
+}
+
+.navbar-nav{
+	height: 100% !important;
+}
+#navbar{
+	position: relative !important;
+	height: 100% !important;
+}
+.navbar-custom .navbar-nav > li > a {
+	color:#fff;
+}
+.navbar-custom .navbar-nav > .active > a, .navbar-nav > .active > a:hover, .navbar-nav > .active > a:focus {
+	color: #ffffff;
+	background-color:transparent;
+}
+.navbar-custom .navbar-brand {
+	color:#eeeeee;
+}
+.navbar-search {
+
+}
+.navbar-search-input{
+	width: 100% !important;
+}
+.navbar-search-fgroup{
+	width: 100% !important;
+}
+.navbar-form{
+	width: 550px !important;
+}
+#search {
+	height: 25px;
+	margin-top: 10px !important;
+	width: 180px !important;
+}
+
+
+.table-striped > tbody > tr > .danger,
+.table-striped > tbody > .danger > td,
+.table-striped > tbody > .danger > th {
+	background-color: #f2dede !important;
+}
+.hide{
+	display:none;
+}
+.profile-image{
+	width: 30px;
+}
+.alert{
+	height: 30px;
+	margin-bottom: 2px !important;
+	padding: 5px !important;
+	margin-top: 10px;
+}
+.centered{
+	float: none;
+	margin: 0 auto;
+}
+
+.selected {
+	color: blue;
+	background-color: #D3D3D3 !important;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	color: white;
+	font-size: 14px;
+	font-weight: 400;
+	line-height: 1;
+	padding: 6px 12px;
+	text-align: center;
+}
+
+#page{
+	//margin-top: 50px;
+}
+#loading{
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    z-index: -1;
+}
+
+.loading-spin{
+	heigth: 100% !important;
+	//margin-left: 140px;
+	position:fixed;
+	top: 50%;
+	left: 50%;
+	transform: translateX(-50%) translateY(-50%);
+}
+.wrapper {
+	height: 87%;
+	width: 100%;
+	position: relative;
+	overflow-y: auto;
+}
+
+
+.footer-bar ul {
+	padding: 0%;
+	margin: 0px;
+	height: 100%;
+	width: 100%;
+}
+.footer-bar span, 
+.footer-bar li {
+	letter-spacing: 1px;
+	font-size: 13px;
+	display: inline-block;
+	text-align: left;
+	padding-left: 1%;
+	padding-right: 1%;
+	top: 45%;
+	position: relative;
+	transform: translateY(-50%);
+	-webkit-transform: translateY(-50%);
+	-moz-transform: translateY(-50%);
+	-ms-transform: translateY(-50%);
+	-o-transform: translateY(-50%);
+}
+#unauth {
+    position: relative;
+    width: 100%;
+    height: 94%;
+}
+#unauth .banner {
+    height: 50%;
+    position: relative;
+    width: 100%;
+    background-position: center center;
+    -webkit-background-size: cover;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+#unauth .banner img {
+    height: 50%;
+    left: 50%;
+    position: relative;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+#unauth .info {
+    position: relative;
+    height: 50%;
+    width: 100%;
+}
+#unauth .info .message,
+#unauth .info .account {
+    width: 49.90%;
+    position: relative;
+    float: left;
+    display: inline-block;
+    padding: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+#unauth .info .account .signed {
+    color: #444;
+    font-size: 2.4rem;
+    font-weight: bold;
+    text-align: center;
+    left: 50%;
+    position: relative;
+    transform: translateX(-50%);
+    margin: 2% 0%;
+}
+#unauth .info .account .profile {
+    align-items: center;
+    display: flex;
+    background-color: #f5f5f5;
+    border: .1rem solid #c3c3c3;
+    width: auto;
+    left: 50%;
+    position: relative;
+    max-width: 80%;
+    transform: translateX(-50%);
+}
+#unauth .info .account .profile img {
+    width: 10%;
+    position:relative;
+    float: left;
+    margin: 0% 2%;
+    flex: 0 0 auto;
+    height: 5rem;
+    margin: 1rem;
+    width: 5rem;
+}
+#unauth .info .account .profile .details {
+    flex: 1 1 auto;
+    line-height: 1.9rem;
+    overflow: hidden;
+}
+#unauth .info .account .profile .details .display,
+#unauth .info .account .profile .details .email {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: block;
+}
+#unauth .info .account .profile .logout {
+    background-color: #f8f8f8;
+    border: .1rem solid #cecece;
+    font-size: 1.1rem;
+    margin: 0% 2%;
+    float: right;
+    cursor: default;
+    border-radius: 1%;
+    font-weight: bold;
+    text-align: center;
+    white-space: nowrap;
+    line-height: 27px;
+    max-width: 20%;
+    outline: 0;
+    padding: 0% 2%;
+}
+#unauth .message .title {
+    color: red;
+    font-size: 2.4rem;
+    font-weight: 100;
+    text-align: center;
+}
+#unauth .message .content {
+    font-size: 1.8rem;
+    font-weight: 100;
+    text-align: center;
+}

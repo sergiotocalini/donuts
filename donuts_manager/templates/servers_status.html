@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block js %}
+{% endblock %}
+	      {% block main_menu %}
+
+	      <li class=" showZonesMain"><a href="{{url_for('index')}}">Home</a></li>
+        <li class=""><a href="{{url_for('zone_to_publish')}}">To be published</a></li>
+	      {% if session.user.admin %}
+        <li class=""><a id="addZone" href="#">Add Zone</a></li>
+	      <li class=""><a href="{{url_for('admin')}}">Admin</a></li>
+	      {% endif %}
+	      {% endblock %}
+
+{% block main %}
+ <div id='main' class="container">
+	<div class='row'>
+
+
+				<table class="table">
+					<thead>
+		    			<tr>
+		      				<th>hostname</th>
+			      			<th>status</th>
+			   	 		</tr>
+			  		</thead>
+			  		<tbody>
+				  		<tr>
+				  			<td> {{ctx.status.master.HOST }} (MASTER) </td>
+				  			<td> {% if ctx.status.master %} working {% else %} error {% endif %}</td>	
+				  		</tr>
+				  		{% for i in ctx.status.slaves%}
+				  			<tr>
+				  				<td> {{i.HOST}} (SLAVE) </td>
+				  				<td> {% if i.status %} working {% else %} error {% endif %}</td>	
+				  			</tr>
+				  		{% endfor %}
+		  			</tbody>
+				</table>
+
+   	</div>
+ </div>
+{% endblock %}

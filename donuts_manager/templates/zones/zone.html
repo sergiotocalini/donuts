@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+{% block js %}
+<script>
+{% include 'libs.js' %}
+{% include 'zones/libs.js' %}
+
+
+function actionFormat(value){
+    var html = `
+     <a class="edit_record" href="#" data-record="{record}"
+     data-zone="{zone}" data-ttl="{ttl}" 
+     data-record_value='{record_value}' 
+     data-record_type="{record_type}"> <i class="fa fa-pencil"></i> </a>
+
+     <a class="remove_record" href="#" 
+     data-record="{record}" data-zone="{zone}" data-ttl="{ttl}" 
+     data-record_value='{record_value}' data-record_type="{record_type}">
+      <i class="fa fa-trash"></i></a>
+    `;
+    html = html.format(value);
+    return html;
+ }
+
+function removeRecord(zone, record, record_type, record_value, ttl){
+    bootbox.confirm("Are you sure you want to remove the record?", function(result) {
+     if (result == true){
+	 var data = {'ttl': ttl, 'record_type': record_type, 'zone': zone,
+		     'record_value': record_value, 'record': record};
+         var url = "{{url_for('remove_record')}}";
+         $.ajax({
+	     url: url,
+	     type: "POST",
+	     data: data,
+	     dataType: "json",
+	     success: function(request){
+		 var url = "{{url_for('zone_page', zone='zone-name')}}";
+		 url = url.replace('zone-name', zone);
+             },
+             error: function(request){
+		 
+             }
+         });
+	 
+     }
+    }); 
+
+}
+
+
+function editRecord(zone, record, record_type, record_value, ttl){
+    $('#EditRecordModalZoneName').html('Edit Record to ' + zone);
+    $('#EditRecordForm').html('');
+    $('#EditRecordForm').html($('.EditRecordForm').html());
+    $('#zone_id').val(zone);
+    $('#EditRecordForm').find('#record').val(record);
+    $('#EditRecordForm').find('#ttl').val(ttl);
+    $('#EditRecordForm').find('#record_value').val(record_value);
+
+    $('#EditRecordForm').find('#record_original').val(record);
+    $('#EditRecordForm').find('#ttl_original').val(ttl);
+    $('#EditRecordForm').find('#record_value_original').val(record_value);
+    $('#EditRecordForm').find('#zone_id').val(zone);
+    $('#EditRecordForm').find('#record_type_original').val(record_type);
+    $('#EditRecordForm').find('#record_type').val(record_type);
+
+    $('#EditRecordModal').modal('show');
+    $('#btnEditRecord').on('click', function(event){
+        event.preventDefault();
+        sendEditRecord(event);
+    });
+}
+
+function sendEditRecord(event){
+    $('.alert').addClass('hide');
+    var form = $('#EditRecordForm');
+    var url = '{{url_for('edit_record')}}?';
+    url += $(form).serialize();
+    $.ajax({
+        url: url,
+        type: "GET",
+        dataType: "json",
+        success: function(request){
+            $('#EditRecordModal').modal('hide');
+            showZone(ZONE);
+        },
+        error: function(request){
+            for (k in request['responseJSON']['errors']){
+                var key = request['responseJSON']['errors'][k][0];
+                showError(key);
+            }   
+        }
+    });
+}
+
+function showZone(zone){
+    ZONE = zone;
+    var url = "{{url_for('show_zones')}}?"+"zone="+zone;
+    var sel = '#record-table';
+    $(sel).bootstrapTable('destroy');
+    $(sel).html('');
+    loading();
+    $.get(url, function(data, status){
+        console.log(data);
+        var R = data['records']
+	var columns = [
+	    { 
+		'field': 'record',
+		'title': 'Record',
+	    },
+	    {
+		'field': 'record_type',
+		'title': 'Type',
+	    },
+	    {
+		'field': 'record_value',
+		'title': 'Value',
+	    },
+
+	    {
+		'field': 'ttl',
+		'title': 'TTL',
+	    },
+	    {
+		'field': 'actions',
+		'title': 'actions',
+		'formatter': actionFormat
+	    },
+	];
+	var keys = ['record', 'record_type', 'record_value', 'ttl'];
+	for (var i in R){
+	    var row = R[i];
+	    row['zone'] = zone;
+	    row['actions'] = row;
+	}
+	loadingDone();
+	$(sel).bootstrapTable({
+            data: R,
+	    columns: columns
+	});
+	$(sel).show();
+	jqlisteners();
+	$(sel).on('post-body.bs.table', function () {
+            jqlisteners();
+	});
+
+	$('#expiration-btn').click(function(event){
+            var zone = $(this).data('zoneid');
+            expirationForm(zone)
+        })
+        $(".addRecord").click(function() {
+	    addRecord($(this).data('zoneid'));
+        });
+
+        $(".delZone").click(function() {
+            delZone($(this).data('zoneid'));
+        });
+
+    });    
+}
+
+function jqlisteners(){
+    $(".edit_record").click(function() {
+        var zone = $(this).data('zone');
+        var record = $(this).data('record');
+        var record_type = $(this).data('record_type');
+        var record_value = $(this).data('record_value');
+        var ttl = $(this).data('ttl');
+        editRecord(zone, record, record_type, record_value, ttl);
+    });
+    $(".remove_record").click(function() {
+        var zone = $(this).data('zone');
+        var record = $(this).data('record');
+        var record_type = $(this).data('record_type');
+        var record_value = $(this).data('record_value');
+        var ttl = $(this).data('ttl');
+        removeRecord(zone, record, record_type, record_value, ttl);
+    });
+}
+
+function expirationForm(zone){
+    var url = '{{url_for('zone_expiration')}}?';
+    url += 'zone=' + zone;
+    $.get(url, function(data){
+        console.log(data);
+        $('#expirationModalBody').html(data);
+                $('#expirationModal').modal('show');
+    });
+}
+function delZone(zone){
+    bootbox.confirm("Are you sure you want to remove the zone?", function(result) {
+        if (result == true){
+            loading();
+            var url = "{{url_for('remove_zone')}}?zone="+zone;
+            $.ajax({
+               url: url,
+               type: "GET",
+               dataType: "json",
+               success: function(request){
+		   var url = "{{url_for('zones_list')}}";
+                   //window.location.replace(url);
+               },
+               error: function(request){
+
+               }
+            });
+
+        }
+    }); 
+
+}
+loading();
+$(document).ready(function(){
+    
+    showZone("{{ctx.zone}}");
+    $('#main-content').removeClass('hide');
+
+});
+</script>
+{% endblock %}
+
+{% block main %}
+<div id='main-content' class='hide'>
+  <div id='toolbar-zone' >
+    <a href='{{url_for('zone_to_publish')}}?zone={{ctx.zone}}'
+       id='zone-to-publish' 
+       class=" publish btn btn-info" 
+       id='zone-to-publish-button' >
+      <i class="fa fa-2x fa-arrow-up"></i></a>
+    <a href='#'
+       data-zoneid="{{ctx.zone}}"
+       class="  addRecord  btn btn-info">
+      <i class="fa fa-2x fa-plus"></i></a>
+    <a href="#"
+       data-zoneid="{{ctx.zone}}"
+       class=" delZone  btn btn-info"> 
+      <i class='fa fa-2x fa-trash'></i></a> 
+    
+    <a  href="#" class=" btn btn-info"
+	id='expiration-btn'
+	data-zoneid="{{ctx.zone}}">
+      <i class='fa fa-2x fa-calendar'></i></a> 
+  </div>
+  <table id='record-table'
+	 data-show-toggle="false"
+	 data-show-export="false"
+	 data-show-columns="true" data-show-multi-sort="true"
+	 data-sort-name="name" data-pagination="true"
+	 data-toggle="table" data-search="true"
+	 data-toolbar="#toolbar-zone"
+	 data-show-footer="false"
+	 data-page-size="30"
+	 data-escape="false"
+	 class="table table-hover table-striped table-compact 
+		table-condensed table-autosize"
+	 cellspacing="0">
+  </table>
+
+  
+</div> 	
+
+
+
+
+{% endblock %}
+
+{% block modals %} 
+
+    {% include "zones/modals/add_record.html" %}
+    {% include "zones/modals/edit_record.html" %}
+    {% include "zones/modals/expiration_modal.html" %}
+{% endblock%}

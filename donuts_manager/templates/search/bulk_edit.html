@@ -1,0 +1,230 @@
+<br/><br/>
+<div id='bulk-confirmation' style='display: none' class='row'>
+	<div class='col-md-4'></div>
+	<div class='col-md-4'>
+		<form role="form">
+  			<div class="form-group row">
+    				<label class="control-label col-md-2"  for="note">Note: </label>
+    			<div class="col-md-8">
+					<input required type="note" class=" form-control" id="note" name="note" placeholder="Note ">
+
+    				<div id='note_error' class="alert alert-danger hide">
+      					Note is wrong.
+      				</div>
+    			</div>
+
+  			</div>
+
+  		
+			<div class="form-group row">
+				<div class="col-md-5"></div>
+				<div class="col-md-7">
+
+      				<button  id='confirmation-btn' class="btn btn-default">
+	      				<i class="fa fa-floppy-o"></i>
+      				</button>
+      			</div>
+      		</div>
+		</form>
+	</div>
+	<div class='col-md-3'></div>
+
+</div>
+<div id='bulk-records' class='row'>
+	<div class='col-md-4'></div>
+	<div class='col-md-4'>
+		<form role="form">
+ 			<div class='row'> <h3 class='text-center'><span id='zone-title'> </span> </h3> </div>
+  			<div class="row">
+    			<label class="control-label "  for="record">Record: </label>
+    			<div class="input-group">
+					<input required type="record" class="record-input form-control" id="record" name="record" placeholder="Record Name">
+					<a  class="copy-field input-group-addon btn-copy"
+						href='#' id='record-copy' ><i class="fa fa-files-o"></i> </a>
+					
+    			</div>
+    			<div id='record_error' class="alert alert-danger hide">
+      					Record is wrong.
+      			</div>
+  			</div>
+
+
+  			<div class=" row">
+    			<label class="control-label " for="ttl">TTL:</label>
+    			<div class="input-group">
+     		 		<input required type="ttl" class="record-input form-control" id="ttl" name="ttl" placeholder="ttl">
+      				<a class="input-group-addon copy-field btn-copy"  
+      					href='#' id='ttl-copy'>  <i class="fa fa-files-o"></i> </a>
+			    	
+			    	<div id='ttl_error' class="alert alert-danger hide" > ttl is wrong,	    </div>
+			    </div>
+
+  			</div>
+
+
+
+			<div class=" row">
+	  			<label class="control-label " for="record_value">Value:</label>
+			    <div class="input-group">
+      				<input required type="text" class="record-input form-control" id="value" 
+      					name="value" placeholder="Record Value">
+    				<a class="input-group-addon copy-field  btn-copy"
+    					href='#' id='value-copy' >  <i class="fa fa-files-o"></i> </a>
+    				
+      				<div id='value_error' class="alert alert-danger hide" >Value is wrong </div>
+    			</div>
+
+  			</div>
+<br/><br />
+			<div class="form-group row">
+				<div class="col-md-2"></div>
+				<div class="col-md-10">
+		  			<button id='prev-btn'  class="btn btn-primary">
+	    	  			<i class="fa fa-arrow-left"></i>		  				
+		  			</button>
+    	  			<button id='next-btn'  class="btn btn-primary">
+	    	  			<i class="fa fa-arrow-right"></i>
+    	  			</button>
+      				<button  id='submit-btn' class="btn btn-success">
+	      				<i class="fa fa-floppy-o"></i>
+      				</button>
+      			</div>
+      		</div>
+		</form>
+	</div>
+	<div class='col-md-3'></div>
+</div>
+
+<script>
+var records = $.parseJSON({{ctx.records|tojson|safe}});
+var pos = 0;
+var changeItems = [];
+
+function trimThis(value){
+	value = $.trim(value);
+	return value;
+}
+$('#submit-btn').click(function(event){
+	event.preventDefault();
+	for (i in records){
+		if ('changes'  in records[pos]){
+ 			if (records[i]['changes']){
+ 				var n = {'new': {}};
+ 				var record = records[i];
+ 				n['original'] = record['original'];
+ 				n['new']['record'] = trimThis(record['record']);
+ 				n['new']['zone'] = trimThis(record['zone']);
+ 				n['new']['type'] = trimThis(record['type']);
+				n['new']['ttl'] = trimThis(record['ttl']);
+				n['new']['value'] = trimThis(record['value']);
+				changeItems.push(n);
+ 			}
+ 		}
+	}
+	$('#bulk-records').hide();
+	$('#bulk-confirmation').show();
+});
+
+
+$('#confirmation-btn').click(function(event){
+	event.preventDefault();
+	var value = $('#note').val();
+	data = {'note': value, 'actions': changeItems}
+	postData(data);
+
+});
+
+
+function postData(data){
+	var url = '{{url_for('bulk_save')}}';
+	$.post(url, {
+		        contentType: 'application/json',
+        		data: JSON.stringify(data),
+		        dataType: 'json'},
+  					function(data){
+						var url = '{{url_for('zone_to_publish')}}';
+						window.location.href = url;
+					}
+	);
+}
+
+$('.copy-field').click(function(event){
+	var btn = '#' + $(this).attr('id');
+	console.log(btn);
+	$(btn).addClass("selected");
+	$(btn).prop("active", true);
+	var field = this.id.replace('-copy', '');
+	var value = $('#' + field).val();
+	console.log('value:' + field);
+	console.log('value:' + value);
+	for (i in records){
+		records[i]['changes'] = true;
+		records[i][field] = value;
+		console.log(records[i]);
+	}
+
+});
+
+$('#prev-btn').click(function(event){
+	event.preventDefault();
+	if (pos > 0){
+		pos -= 1;
+		renderRecord(pos);
+	}
+
+});
+
+$('#next-btn').click(function(event){
+	event.preventDefault();
+	pos += 1;
+	renderRecord(pos);
+
+});
+
+
+$('.record-input').change(function(event){
+	event.preventDefault();
+	var field = event.target.id;
+ 	var value = event.target.value;
+ 	if (!('changes'  in records[pos])){
+ 		records[pos]['changes'] = true;
+ 	}
+ 	records[pos]['changes'][field] = value;
+ 	records[pos][field] = value;
+
+});
+
+function renderRecord(pos){
+	if (pos == 0){
+		$('#prev-btn').prop('disabled', true);
+		$('#next-btn').prop('disabled', false);
+	} else {
+		$('#prev-btn').prop('disabled', false);
+		if (records.length < pos + 2){
+			$('#next-btn').prop('disabled', true);
+		}else{
+			$('#next-btn').prop('disabled', false);
+		}
+	}
+	var record = records[pos];
+	$('#zone-title').html(record['zone']);
+	$('#record').val(record['record']);
+	$('#ttl').val(record['ttl']);
+	$('#value').val(record['value']);
+}
+function original(){
+	for (i in records){
+	var record = records[i];
+	record['original'] = {};
+ 	records[i]['original']['record'] = trimThis(record['record']);
+ 	records[i]['original']['zone'] = trimThis(record['zone']);
+	records[i]['original']['ttl'] = trimThis(record['ttl']);
+	records[i]['original']['value'] = trimThis(record['value']);
+	records[i]['original']['type'] = trimThis(record['type']);
+	console.log(record);
+	}
+}
+original();
+renderRecord(pos);
+</script>
+

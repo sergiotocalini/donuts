@@ -1,0 +1,5 @@
+flask
+pymongo
+Flask-OAuth
+Flask-Classy
+arrow

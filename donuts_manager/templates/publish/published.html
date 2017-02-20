@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+
+{% block main %}
+<nav class="sub-bar navbar navbar-custom">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header col-md-3">
+
+    </div>
+
+</nav>
+
+<div class="m-content panel panel-default">
+  {% for p in ctx.published%}
+  <div class='row     {% if p.deleted %} warning {% endif %}'>
+    <div class='row'>
+      <div class='col-md-2 col-md-offset-1'>
+	Created by
+      </div>
+      <div class='col-md-7'>
+	{% if p.user.displayname %} {{p.user.displayname}} {% else %} {{p.user.name }} {% endif %}
+      </div>
+    </div>
+    <div class='row'>
+      <div class='col-md-2 col-md-offset-1'>
+	Record
+      </div>
+      <div class='col-md-7'>
+	{{p.record}}.{{p.zone}}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-md-2 col-md-offset-1'>
+	Action
+      </div>
+      <div class='col-md-7'>
+	{{p.action}}
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-md-2 col-md-offset-1' >
+	Note
+      </div>
+      <div class='col-md-7'>
+	{{p.note}}
+      </div>
+    </div>
+    <div class='row'>
+      <div class='col-md-2 col-md-offset-1'>
+	Date
+      </div>
+      <div class='col-md-7'>
+	{{p.published_datetime}} 
+      </div>
+    </div>
+
+    <div class='row'>
+      <div class='col-md-2 col-md-offset-1'>
+	Status
+      </div>
+      <div class='col-md-7 alert alert-success' style="  white-space:pre;   max-width:none;">
+	{{p.out}}
+      </div>
+    </div>
+  </div>
+  <hr/>
+{%endfor%}
+
+</div>
+{% endblock %}
