@@ -238,8 +238,10 @@ body {
     width: 3% !important;
 }
 .sidebar.toggled .logo a img {
-    height: 90%;
+    height: auto;
     width: auto;
+    max-height: 85%;
+    max-width: 90%;
     top: 50% !important;
     left: 50%;
     transform: translateY(-50%) translateX(-50%);

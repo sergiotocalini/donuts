@@ -30,10 +30,13 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.debug = app.config['DEBUG']
 app.register_blueprint(mavapa, url_prefix='/mavapa')
 app.secret_key = app.config['SECRET_KEY']
-mongo_uri = 'mongodb://%s:%s@%s' % (app.config['MONGO_USER'], app.config['MONGO_PASSWORD'], app.config['MONGO_HOST'])
+mongo_uri = 'mongodb://%s:%s@%s/%s' % (app.config['MONGO_USER'], app.config['MONGO_PASSWORD'], app.config['MONGO_HOST'], app.config['MONGO_DB'])
 mongo_client = MongoClient(mongo_uri)
 mongo_db = mongo_client[app.config['MONGO_DB']]
 
+
+if not app.config.has_key('CDN_LOCAL'):
+    app.config['CDN_LOCAL'] = '%s/static' %app.config.get('APPLICATION_ROOT', '')
 
 
 def login_required(f):
@@ -47,8 +50,6 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
-    
 
 def expirations_privs(f):
     @wraps(f)
@@ -236,10 +237,10 @@ def expiration_search():
     return render_template('expirations/search.html', ctx=ctx)
 
 
-@app.route('/admin/dns_servers/', methods=['GET', 'POST'])
+@app.route('/admin/agents', methods=['GET', 'POST'])
 @login_required
 @admin_privs
-def dns_servers():
+def admin_agents():
     if request.method == 'POST':
         data = [(key, request.form.get(key).strip()) for key in request.form.keys()]
         data = dict(data)
@@ -268,7 +269,7 @@ def dns_servers():
             dns['working'] = False
         agents.append(dns)
     ctx = {'app_name': 'dns_servers', 'dnss': agents, 'master_exists': master_exists}
-    return render_template('admin/dns_servers.html', ctx=ctx)
+    return render_template('admin/agents.html', ctx=ctx)
 
 
 @app.route('/admin/dns_servers/sync/', methods=['GET'])
@@ -305,10 +306,10 @@ def delete_dns():
     return 'ok'
 
 
-@app.route('/api/admin/ddns/', methods=['GET', 'POST'])
+@app.route('/admin/ddns', methods=['GET', 'POST'])
 @login_required
 @admin_privs
-def ddns_admin():
+def admin_ddns():
     if request.method == 'POST':
         ddns = request.form.get('ddns', False)
         doc = mongo_db.ddns.find_one({'ddns': ddns})
@@ -403,6 +404,7 @@ def ddns_update():
             data['record'] = doc['record']
             data['record_value'] = ip
             data['record_type'] = 'A'
+            data['view'] = 'private'
             actions.append(data)
             for action in actions:
                 execute_action(mongo_db, action, only_master=True)
@@ -597,9 +599,9 @@ def parse_json(d):
     out += '#' * 80
     return out
 
-@app.route('/zone/published/')
+@app.route('/history')
 @login_required
-def published():
+def history():
     zone = request.args.get('zone', None)  
     query = {'published': True}
     if zone:
@@ -617,12 +619,12 @@ def published():
                     s['status'] = s['status'].replace('\n\n', '\n')
                     d['out'] += s['status']
     ctx = {'published': docs, 'app_name': 'Published'}
-    return render_template('publish/published.html', ctx=ctx)
+    return render_template('history.html', ctx=ctx)
 
 
-@app.route('/zone/to_publish/')
+@app.route('/zones/publish')
 @login_required
-def zone_to_publish():
+def zones_publish():
     zone = request.args.get('zone', None)
     query = {'published': False}
     ctx = {'app_name': 'to_publish'}
@@ -635,7 +637,7 @@ def zone_to_publish():
     docs = list(mongo_db.to_publish.find(query))
     if docs:
         ctx['to_publish'] = docs
-    return render_template('publish/to_publish.html', ctx=ctx) 
+    return render_template('zones/publish.html', ctx=ctx) 
 
 
 @app.route('/zones/')
@@ -766,8 +768,6 @@ def bulk_save():
         doc['published'] = False
         mongo_db['to_publish'].save(doc)
     return 'ok'
-
-
     
 
 @app.route('/api/zones/')

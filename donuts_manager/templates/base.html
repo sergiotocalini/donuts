@@ -3,22 +3,29 @@
   <head>
     <title>{% block title %}{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="{{ config['CDN_DOLAB'] }}/img/favicon.ico" type="image/x-icon"/>    
-    <link href="{{ config['CDN_BOOTSTRAP'] }}/css/bootstrap.min.css" rel="stylesheet">
-    <link href="{{ config['CDN_BOOTSTRAP'] }}/css/bootstrap-theme.min.css" rel="stylesheet">
-    <link href="{{ config['CDN_FONTAWESOME'] }}/css/font-awesome.min.css" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon"/>
+    
+    <link  href="{{ config['CDN_BOOTSTRAP'] }}/css/bootstrap.min.css" rel="stylesheet">
+    <link  href="{{ config['CDN_BOOTSTRAP'] }}/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link  href="{{ config['CDN_FONTAWESOME'] }}/css/font-awesome.min.css" rel="stylesheet">
 
-    <link href="{{url_for('static', filename='style.css')}}" rel="stylesheet">
-    <link href="{{ config['CDN_MAVAPA'] }}/mavapa.css" rel="stylesheet">
-    <script src="{{ config['CDN_COMMON'] }}/js/jquery.min.js"></script>
-    <script src="{{ config['CDN_BOOTSTRAP'] }}/js/bootstrap.min.js"></script>
+    <link  href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+
+<!--    <script src="{{ config['CDN_COMMON'] }}/js/jquery.min.js"></script> -->
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<!--    <script src="{{ config['CDN_BOOTSTRAP'] }}/js/bootstrap.min.js"></script> -->
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
     
     <script src="//cdn.corpam.com.ar/bootbox/stable/js/bootbox.min.js"></script>
+
     <script src="//cdn.corpam.com.ar/bootstrap-typeahead/v4.0.0/js/bootstrap3-typeahead.min.js"></script>
+
     <script src="//cdn.corpam.com.ar/bootstrap-datepicker/stable/js/bootstrap-datepicker.min.js"></script>
-    <link href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
+    
+    <link  href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
     <script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
-    <link rel="shortcut icon" href="{{url_for('static', filename='/favicon.ico')}}" type="image/x-icon"/>
+
+    <link  href="{{ config['CDN_MAVAPA'] }}/mavapa.css" rel="stylesheet">
     <script src="{{ config['CDN_MAVAPA'] }}/mavapa.js"></script>
     <style>
       .panel-default {
@@ -153,31 +160,20 @@
     	    <span class="hiddeable">Zones</span>
     	  </a>
 	</li>
-	<li id='addZone'>
-    	  <a href="#"
-    	     title="Add Zone" data-toggle="tooltip">
-    	    <i class="item fa fa-fw fa-plus" aria-hidden="true"></i>
-    	    <span class="hiddeable">Add Zone</span>
-    	  </a>
-	</li>
 	<li>
-    	  <a href="{{url_for('zone_to_publish')}}"
+    	  <a href="{{url_for('zones_publish')}}"
     	     title="Unpublished" data-toggle="tooltip">
-    	    <i class="item fa fa-fw fa-arrow-up" aria-hidden="true"></i>
+    	    <i class="item fa fa-fw fa-clipboard" aria-hidden="true"></i>
     	    <span class="hiddeable">Publish</span>
     	  </a>
 	</li>
 	<li>
-    	  <a href="{{url_for('published')}}"
+    	  <a href="{{url_for('history')}}"
     	     title="Logs" data-toggle="tooltip">
     	    <i class="item fa fa-fw fa-history" aria-hidden="true"></i>
-    	    <span class="hiddeable">Logs</span>
+    	    <span class="hiddeable">History</span>
     	  </a>
-	</li>
-
-
-
-	
+	</li>	
 	{% if session.user.admin %}
 	<li class="dropdown">
 	  <a href="#" class="dropdown-toggle" data-toggle="dropdown"
@@ -200,13 +196,13 @@
     	      </a>
 	    </li>
 	    <li>
-    	      <a href="{{ url_for('dns_servers') }}">
+    	      <a href="{{ url_for('admin_agents') }}">
     		<i class="fa fa-fw fa-user-secret" aria-hidden="true"></i>
     		<span>Agents</span>
     	      </a>
 	    </li>
 	    <li>
-	      <a href="{{ url_for('ddns_admin') }}">
+	      <a href="{{ url_for('admin_ddns') }}">
 		<i class="fa fa-fw fa-exchange" aria-hidden="true"></i>
 		<span>Dynamic Dns</span>
 	      </a>

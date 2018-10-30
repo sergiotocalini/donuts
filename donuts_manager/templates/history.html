@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+
+{% block js%}
+<script>
+{% include 'js/common.js' %}
+$( document ).ready(function() {
+    autosize_tables();
+});	
+</script>
+{% endblock %}
+
+{% block main %}
+<div id="main-content" style="padding: 2%; height: 100%; width: 100%">
+  <table id="Table"
+	 data-show-toggle="false"
+	 data-show-export="false"
+	 data-show-columns="true" data-show-multi-sort="true"
+	 data-sort-name="date" data-pagination="true"
+	 data-toggle="table" data-search="true"
+	 data-show-footer="false"
+	 data-page-size="30"
+	 data-escape="false"
+	 class="table table-hover table-striped table-compact 
+		table-condensed table-autosize"
+	 cellspacing="0">
+    <thead>
+      <tr>
+	<th data-field="select" data-visible="false"
+	    data-checkbox="true">
+	  <i class="fa fa-fw fa-check-square"></i>
+	</th>
+	<th data-visible="false" data-field="status">
+	  Status
+	</th>
+	<th data-valign="middle" data-align="center" data-field="operation"
+	    data-halign="center" data-sortable="true">
+	  Operation
+	</th>
+	<th data-valign="middle" data-align="center" data-field="record"
+	    data-halign="center" data-sortable="false">
+	  Record
+	</th>
+	<th data-valign="middle" data-align="center" data-field="zone"
+	    data-halign="center" data-sortable="true">
+	  Zone
+	</th>
+	<th data-valign="middle" data-align="left" data-field="owner"
+	    data-halign="center" data-sortable="true">
+	  <i class="fa fa-fw fa-user"></i>
+	  Owner
+	</th>
+	<th>
+	  Note
+	</th>
+	<th data-valign="middle" data-align="center" data-field="date"
+	    data-halign="center" data-sortable="true">
+	  <i class="fa fa-calendar fa-fw"></i>
+	  Date
+	</th>
+	<th data-visible="false" data-field="log">
+	  Log
+	</th>
+	<th data-valign="middle" data-align="center" data-field="actions">
+	  <i class="fa fa-fw fa-cog"></i>
+	</th>
+      </tr>
+    </thead>
+    <tbody>  
+      {% for p in ctx.published %}
+      <tr id="{{ p.id }}">
+	<td></td>
+	<td></td>
+	<td>{{ p.action }}</td>
+	<td>{{ p.record }}</td>
+	<td>{{ p.zone }}</td>
+	<td>{% if p.user.displayname %} {{ p.user.displayname }} {% else %} {{ p.user.name }} {% endif %}</td>
+	<td>{{ p.note }}</td>
+	<td>{{ p.published_datetime }}</td>
+	<td>{{ p.out }}</td>
+	<td>
+	  <a class="row-detail" href="#">
+	    <i class="fa fa-fw fa-file"></i>
+	  </a>
+	</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

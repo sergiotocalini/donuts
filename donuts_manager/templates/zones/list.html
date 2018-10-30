@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% block title %}Zones{% endblock %}
+
 {% block js %}
 <script>
 {% include 'libs.js' %}
+{% include 'js/common.js' %}
 {% include 'zones/libs.js' %}
 var ZONE = null;
 var PAGECLASS = 'refreshZones';
@@ -26,7 +29,6 @@ function refreshZones(){
     var PAGECLASS = 'refreshZones';
     loading();
     $.get("{{url_for('show_zones')}}", function(data, status){
-
         ALL_ZONES = data['data']['zones'];
 	var columns = [
 	    {
@@ -35,8 +37,12 @@ function refreshZones(){
 		'formatter': nameFormatter
 	    },
 	    {
+		'field': 'view',
+		'title': 'View',
+	    },
+            {
 		'field': 'published',
-		'title': '#Changes',
+		'title': 'Changes',
 	    },
 	    {
 		'field': 'name',
@@ -107,9 +113,6 @@ function autoSearch(){
 }
 $( document ).ready(function() {	
     refreshZones();
-    autosize_tables();
-
-
     $(".showZonesMain").click(function() {
 	refreshZones();
 	autosize_tables();
@@ -127,42 +130,39 @@ $( document ).ready(function() {
 	event.preventDefault();
 	sendAddRecord(event);
     });
-
+    autosize_tables();
 });
 </script>
 {% endblock %}
 
 {% block main %}
-<div id='main-content'>
-  <div id="showZonesWindow" class="main-window"  style='display:none'>
-    <div class=" sub-content panel panel-default m-content">
-      <table id='zonesTable'
-	     data-show-toggle="false"
-	     data-show-export="false"
-	     data-show-columns="true" data-show-multi-sort="true"
-	     data-sort-name="name" data-pagination="true"
-	     data-toggle="table" data-search="true"
-	     data-toolbar="#toolbar-user"
-	     data-show-footer="false"
-	     data-page-size="15"
-	     data-escape="false"
-	     class="table table-hover table-striped table-compact 
-		    table-condensed table-autosize"
-	     cellspacing="0">
-      </table>
-    </div>
+<div id="showZonesWindow" class="main-window" style="display:none;padding: 2%; height: 100%; width: 100%">
+  <div id="toolbar-zones">
+    <button class="btn btn-primary" type="button"
+	    id="addZone" aria-haspopup="true"
+	    aria-expanded="false">
+      <i class="fa fa-fw fa-plus"></i>
+    </button>
   </div>
-  
-</div> 	
-
-
-
-
+  <table id="zonesTable"
+	 data-show-toggle="false"
+	 data-show-export="false"
+	 data-show-columns="true" data-show-multi-sort="true"
+	 data-sort-name="name" data-pagination="true"
+	 data-toggle="table" data-search="true"
+	 data-toolbar="#toolbar-zones"
+	 data-show-footer="false"
+	 data-page-size="15"
+	 data-escape="false"
+	 class="table table-hover table-striped table-compact 
+		table-condensed table-autosize"
+	 cellspacing="0">
+  </table>
+</div>
 {% endblock %}
 
 {% block modals %} 
-
-    {% include "zones/modals/add_record.html" %}
-    {% include "zones/modals/edit_record.html" %}
-    {% include "zones/modals/expiration_modal.html" %}
+{% include "zones/modals/add_record.html" %}
+{% include "zones/modals/edit_record.html" %}
+{% include "zones/modals/expiration_modal.html" %}
 {% endblock%}

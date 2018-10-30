@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Administration: Agents{% endblock %}
+
+{% block js%}
+<script>
+{% include 'libs.js' %}
+{% include 'js/common.js' %}  
+$( document ).ready(function() {	
+    $("#add-dns").click(function(event) {
+	console.log('hey!');
+	$('#AddDNS').modal('show');
+    });
+    $(".remove_dns").click(function(event) {
+	event.preventDefault();
+	var url = $(this).attr('href');
+       	console.log(url);
+	bootbox.confirm("Are you sure you want to remove this ddns?", function(result) {
+       	    if (result == true){
+		
+       		callUrlAndReload(url);
+	    }
+    	}); 
+    });
+    $(".sync-dns").click(function(event){
+	var id = $(this).data('id');
+	var content = $('#diff_' + id).html();
+	console.log(content);
+	var url = '{{url_for('dns_servers_sync')}}?id=' + id;
+	bootbox.confirm(content, function(result) {
+       	    if (result == true){
+                window.location.replace(url);
+            }
+    	}); 
+    })
+    autosize_tables();
+});
+</script>
+{% endblock%}
+
+{% block search_nav %}{% endblock %}
+{% block main %}
+<div id="main-content" style="padding: 2%; height: 100%; width: 100%">  
+  <div id="toolbar-admin-agents">
+    <button class="btn btn-success" type="button"
+	    id="add-dns" aria-haspopup="true"
+	    aria-expanded="false">
+      <i class="fa fa-fw fa-plus"></i>
+      Add Server
+    </button>
+  </div>
+  <table id="Table"
+	 data-show-toggle="false"
+	 data-show-export="false"
+	 data-show-columns="true" data-show-multi-sort="true"
+	 data-sort-name="name" data-pagination="true"
+	 data-toggle="table" data-search="true"
+	 data-toolbar="#toolbar-admin-agents"
+	 data-show-footer="false"
+	 data-page-size="15"
+	 data-escape="false"
+	 class="table table-hover table-striped table-compact
+		table-condensed table-autosize" 
+	 cellspacing="0">
+    <thead>
+      <tr>
+	<th>
+	  Name
+	</th>
+	<th>
+	  Secret Key
+	</th>
+	<th>
+	  URL
+	</th>
+	<th>
+	  Type
+	</th>
+	<th>
+	  Zones
+	</th>
+	<th>
+	  Differences
+	</th>
+	<th>
+	  Last Sync</th>
+	<th>
+	  Working
+	</th>
+	<th>
+	  Actions
+	</th>
+      </tr>
+    </thead>
+    <tbody >
+      {% for dns in ctx.dnss %}
+      <tr id="{{dns._id}}">
+	<td>
+	  {{dns.ip}}
+	</td>
+	<td>
+	  {{dns.secret_key}}
+	</td>
+	<td>
+	  {{dns.path}}
+	</td>
+	<td>
+	  {{dns.type}}
+	</td>
+	<td>{{dns.zones_len}}</td>
+	<td>
+	  {% if dns.zones_diff_len %}
+	  <a href='#' class='sync-dns' data-id='{{dns._id}}'> 	{{dns.zones_diff_len}} </a>
+	  <div id="diff_{{dns._id}}" class='hide'>
+	    <strong> zones: </strong>
+	    <br/>
+	    {% for zone in dns.zones_diff %}
+	    <strong> {{zone}} </strong><br/>
+	    {% endfor%}
+	  </div>
+	  {% endif %}
+	</td>
+	<td>
+	  {{dns.last_update}}
+	</td>
+	<td>
+	  {% if dns.working%}
+	  <i class="fa fa-check"></i>
+	  {% else %}
+	  <i class="fa fa-times"></i>
+	  {% endif %}
+	</td>
+	<td>
+	  <a class='remove_dns' href='{{url_for('delete_dns')}}?id={{dns._id}}' ><i class='fa fa-trash'></i> </a> 
+	</td>
+      </tr>	
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block modals%}
+<!-- Modal Add -->
+<div class="modal fade bs-example-modal-lg" id="AddDNS" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width: 400">
+    <div class="modal-content">
+      <div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+	<h4 class="centered modal-title" id="AddDDNSModalZoneName">Add DDNS </h4>
+      </div>
+      <div class="modal-body">
+	<form id="AddDNSForm" role="form" style='padding-left: 10px; width: 355px' class="form form-horizontal" method='POST'>
+	  <div class="form-group">
+	    <input required type="ddns" class="form-control" id="ip" name="ip" placeholder="IP">
+	  </div>
+	  <div class="form-group">
+	    <input required type="ddns" class="form-control" id="secret_key" name="secret_key" placeholder="Secret Key">
+	  </div>
+	  <div class="form-group">
+	    <input required type="ddns" class="form-control" id="path" name="path" placeholder="path (eg: http://localhost:5000/)">
+	  </div>
+	  <div class="form-group">
+	    <select class="form-control "  name="type" id="type" >
+	      {% if not ctx.master_exists %}
+	      <option>Master</option>
+	      {% endif %}
+	      <option>Slave</option>
+	    </select>
+	  </div>
+	  <button type="submit" class="btn btn-primary">Submit</button>
+	</form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /Modal Add -->
+{% endblock %}

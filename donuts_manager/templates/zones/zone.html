@@ -1,9 +1,67 @@
 {% extends "base.html" %}
+{% block title %}Zone: {{ ctx.zone }}{% endblock %}
+
+{% block main %}
+<div id="main-content" class="hide" style="padding: 2%; height: 100%; width: 100%">
+  <div id="toolbar-zone">
+    <a href="{{ url_for('zones_publish') }}?zone={{ ctx.zone }}"
+       id="zone-to-publish"
+       class="publish btn btn-success" 
+       id="zone-to-publish-button">
+      <i class="fa fa-2x fa-arrow-up"></i>
+    </a>
+    <a href="#"
+       data-zoneid="{{ctx.zone}}"
+       class="addRecord btn btn-primary">
+      <i class="fa fa-2x fa-plus"></i>
+    </a>
+    <a href="#"
+       data-zoneid="{{ ctx.zone }}"
+       class="delZone btn btn-danger"> 
+      <i class="fa fa-2x fa-trash"></i>
+    </a> 
+    <a  href="#" class="btn btn-default"
+	id="expiration-btn"
+	data-zoneid="{{ ctx.zone }}">
+      <i class="fa fa-2x fa-calendar"></i>
+    </a>
+  </div>
+  <table id="record-table"
+	 data-show-toggle="false"
+	 data-show-export="false"
+	 data-show-columns="true" data-show-multi-sort="true"
+	 data-sort-name="name" data-pagination="true"
+	 data-toggle="table" data-search="true"
+	 data-toolbar="#toolbar-zone"
+	 data-show-footer="false"
+	 data-page-size="30"
+	 data-escape="false"
+	 class="table table-hover table-striped table-compact 
+		table-condensed table-autosize"
+	 cellspacing="0">
+  </table>
+</div> 	
+{% endblock %}
+
+{% block modals %} 
+{% include "zones/modals/add_record.html" %}
+{% include "zones/modals/edit_record.html" %}
+{% include "zones/modals/expiration_modal.html" %}
+{% endblock%}
+
 {% block js %}
 <script>
-{% include 'libs.js' %}
-{% include 'zones/libs.js' %}
+{% include "libs.js" %}
+{% include "zones/libs.js" %}
+{% include "js/common.js" %}
 
+$(document).ready(function () {
+    autosize_tables();
+    $(window).resize(function () {
+	autosize_tables();
+    });
+    jqlisteners();
+});
 
 function actionFormat(value){
     var html = `
@@ -23,29 +81,25 @@ function actionFormat(value){
 
 function removeRecord(zone, record, record_type, record_value, ttl){
     bootbox.confirm("Are you sure you want to remove the record?", function(result) {
-     if (result == true){
-	 var data = {'ttl': ttl, 'record_type': record_type, 'zone': zone,
-		     'record_value': record_value, 'record': record};
-         var url = "{{url_for('remove_record')}}";
-         $.ajax({
-	     url: url,
-	     type: "POST",
-	     data: data,
-	     dataType: "json",
-	     success: function(request){
-		 var url = "{{url_for('zone_page', zone='zone-name')}}";
-		 url = url.replace('zone-name', zone);
-             },
-             error: function(request){
-		 
-             }
-         });
-	 
-     }
+	if (result == true) {
+	    var data = {'ttl': ttl, 'record_type': record_type, 'zone': zone,
+			'record_value': record_value, 'record': record};
+            var url = "{{url_for('remove_record')}}";
+            $.ajax({
+		url: url,
+		type: "POST",
+		data: data,
+		dataType: "json",
+		success: function(request){
+		    var url = "{{url_for('zone_page', zone='zone-name')}}";
+		    url = url.replace('zone-name', zone);
+		},
+		error: function(request){
+		}
+            });	 
+	}
     }); 
-
 }
-
 
 function editRecord(zone, record, record_type, record_value, ttl){
     $('#EditRecordModalZoneName').html('Edit Record to ' + zone);
@@ -55,14 +109,12 @@ function editRecord(zone, record, record_type, record_value, ttl){
     $('#EditRecordForm').find('#record').val(record);
     $('#EditRecordForm').find('#ttl').val(ttl);
     $('#EditRecordForm').find('#record_value').val(record_value);
-
     $('#EditRecordForm').find('#record_original').val(record);
     $('#EditRecordForm').find('#ttl_original').val(ttl);
     $('#EditRecordForm').find('#record_value_original').val(record_value);
     $('#EditRecordForm').find('#zone_id').val(zone);
     $('#EditRecordForm').find('#record_type_original').val(record_type);
     $('#EditRecordForm').find('#record_type').val(record_type);
-
     $('#EditRecordModal').modal('show');
     $('#btnEditRecord').on('click', function(event){
         event.preventDefault();
@@ -154,7 +206,7 @@ function showZone(zone){
         $(".delZone").click(function() {
             delZone($(this).data('zoneid'));
         });
-
+	autosize_tables($(sel));
     });    
 }
 
@@ -190,7 +242,7 @@ function delZone(zone){
     bootbox.confirm("Are you sure you want to remove the zone?", function(result) {
         if (result == true){
             loading();
-            var url = "{{url_for('remove_zone')}}?zone="+zone;
+            var url = "{{url_for('remove_zone')}}?zone="+zone+"&view=private";
             $.ajax({
                url: url,
                type: "GET",
@@ -200,72 +252,15 @@ function delZone(zone){
                    //window.location.replace(url);
                },
                error: function(request){
-
                }
             });
-
         }
     }); 
-
 }
 loading();
-$(document).ready(function(){
-    
+$(document).ready(function(){    
     showZone("{{ctx.zone}}");
     $('#main-content').removeClass('hide');
-
 });
 </script>
 {% endblock %}
-
-{% block main %}
-<div id='main-content' class='hide'>
-  <div id='toolbar-zone' >
-    <a href='{{url_for('zone_to_publish')}}?zone={{ctx.zone}}'
-       id='zone-to-publish' 
-       class=" publish btn btn-info" 
-       id='zone-to-publish-button' >
-      <i class="fa fa-2x fa-arrow-up"></i></a>
-    <a href='#'
-       data-zoneid="{{ctx.zone}}"
-       class="  addRecord  btn btn-info">
-      <i class="fa fa-2x fa-plus"></i></a>
-    <a href="#"
-       data-zoneid="{{ctx.zone}}"
-       class=" delZone  btn btn-info"> 
-      <i class='fa fa-2x fa-trash'></i></a> 
-    
-    <a  href="#" class=" btn btn-info"
-	id='expiration-btn'
-	data-zoneid="{{ctx.zone}}">
-      <i class='fa fa-2x fa-calendar'></i></a> 
-  </div>
-  <table id='record-table'
-	 data-show-toggle="false"
-	 data-show-export="false"
-	 data-show-columns="true" data-show-multi-sort="true"
-	 data-sort-name="name" data-pagination="true"
-	 data-toggle="table" data-search="true"
-	 data-toolbar="#toolbar-zone"
-	 data-show-footer="false"
-	 data-page-size="30"
-	 data-escape="false"
-	 class="table table-hover table-striped table-compact 
-		table-condensed table-autosize"
-	 cellspacing="0">
-  </table>
-
-  
-</div> 	
-
-
-
-
-{% endblock %}
-
-{% block modals %} 
-
-    {% include "zones/modals/add_record.html" %}
-    {% include "zones/modals/edit_record.html" %}
-    {% include "zones/modals/expiration_modal.html" %}
-{% endblock%}
