@@ -25,7 +25,7 @@ $( document ).ready(function() {
 	var id = $(this).data('id');
 	var content = $('#diff_' + id).html();
 	console.log(content);
-	var url = '{{url_for('dns_servers_sync')}}?id=' + id;
+	var url = '{{ url_for('admin_agents_sync') }}?id=' + id;
 	bootbox.confirm(content, function(result) {
        	    if (result == true){
                 window.location.replace(url);
@@ -109,7 +109,9 @@ $( document ).ready(function() {
 	<td>{{dns.zones_len}}</td>
 	<td>
 	  {% if dns.zones_diff_len %}
-	  <a href='#' class='sync-dns' data-id='{{dns._id}}'> 	{{dns.zones_diff_len}} </a>
+	  <a href='#' class='sync-dns' data-id='{{dns._id}}'>
+	    {{dns.zones_diff_len}}
+	  </a>
 	  <div id="diff_{{dns._id}}" class='hide'>
 	    <strong> zones: </strong>
 	    <br/>

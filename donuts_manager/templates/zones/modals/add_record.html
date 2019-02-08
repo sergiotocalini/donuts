@@ -1,5 +1,4 @@
 
-
 <!-- Modal Add -->
 <div class="modal fade bs-example-modal-lg" id="AddRecordModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width: 400">
@@ -30,7 +29,7 @@
   <div class="form-group row" id='record-input'>
     <label class="control-label col-sm-2 col-sm-offset-1" for="record">Record:</label>
     <div class="col-sm-6 input-group">
-      <input required type="record" class="form-control" id="record" name="record" placeholder="Record Name">
+      <input required type="record" class="form-control" id="name" name="name" placeholder="Record Name">
       <span class="input-group-addon">.<span class=" ZoneNameTag"></span></span>
 
       <div id='record_error' class="alert alert-danger hide">Record is wrong.</div>
@@ -52,7 +51,7 @@
   <div class="form-group row">
     <label class="control-label col-sm-2 col-sm-offset-1" for="record_type">Type:</label>
     <div class='col-sm-6  input-group'>
-      <select class="form-control "  name="record_type" class="form-control" id="record_type" >
+      <select class="form-control "  name="type" class="form-control" id="type" >
 	<option value="A">A</option>
 	<option value="CNAME">CNAME</option>
 	<option value="SRV">SRV</option>
@@ -67,9 +66,9 @@
   </div>
 
   <div class="form-group row">
-    <label class="control-label col-sm-2 col-sm-offset-1" for="record_value">Value:</label>
+    <label class="control-label col-sm-2 col-sm-offset-1" for="value">Value:</label>
     <div class="col-sm-6 input-group">
-      <input required type="text" class="form-control" id="record_value" name="record_value" placeholder="Record Value">
+      <input required type="text" class="form-control" id="value" name="value" placeholder="Record Value">
       <div id='record_value_error' class="alert alert-danger hide" >Value is wrong </div>
     </div>
   </div>
@@ -83,7 +82,8 @@
   </div>
 
 
-  <input  type="hidden" class="form-control" id="zone_id" name="zone">  
+    <input  type="hidden" class="form-control" id="zone" name="zone">
+    <input  type="hidden" class="form-control" id="view" name="view">  
 
 
 </div>

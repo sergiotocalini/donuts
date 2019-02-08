@@ -22,11 +22,12 @@ def execute_action(mongo_db, action, only_master=False, only_slaves=False, debug
     data = []
     if only_master:
         try:
+            print(action)
             doc = mongo_db.dns_servers.find_one({'type': 'Master'})
             data = agent_call(doc['path'], doc['secret_key'], action)
             doc['last_update'] = datetime.datetime.now()
             mongo_db.dns_servers.save(doc)
-            if debug:
+            if True:
                 pprint.pprint(data)
         except Exception as e:
             raise MasterConnectionFail
@@ -84,6 +85,7 @@ def parse_record(zone, ovalues):
                     break
     return record
 
+
 def get_records(mongo_db, zone, no_parse=False, app=None):
     doc = mongo_db.dns_servers.find_one({'type': 'Master'})
     z = dns.zone.from_xfr(dns.query.xfr(doc['ip'], zone))
@@ -109,12 +111,13 @@ def get_records(mongo_db, zone, no_parse=False, app=None):
                 records.append(r)
     return soa, records
 
-
-
+    
 def parse_zone(r, mongo_db, session, no_records, app):
     if not no_records:
         try:
-            r['soa'], r['records'] = get_records(mongo_db, r['zone'], app=app)
+            r['soa'], r['records'] = get_records(
+                mongo_db, r['zone'], app=app
+            )
         except dns.exception.FormError:
             data['data']['zones'].remove(r)
             return False
@@ -150,10 +153,8 @@ def parse_zone(r, mongo_db, session, no_records, app):
 
 
 def get_all_zones(mongo_db, session, no_records=False, debug=False, no_cache=False, app=None):
-    print 'aca'
-    uid = None
     user = session.get('user')
-    uid = user['id']
+    uid = user.get('id')
     cache_query = {'app': 'get_all_zones', 'user': uid}
     doc = mongo_db.cache.find_one(cache_query)
     if doc:
@@ -177,6 +178,94 @@ def get_all_zones(mongo_db, session, no_records=False, debug=False, no_cache=Fal
             if unicode(r['zone']) not in azones:
                 continue
         r = parse_zone(r, mongo_db, session, no_records, app)
+        if r:
+            zones.append(r)
+    data['data']['zones'] = zones
+    data['data']['count'] = len(zones)
+    cache_query['data'] = data
+    cache_query['last_update'] = datetime.datetime.now()
+    mongo_db.cache.save(cache_query)
+    data['data']['cached'] = False
+    print 'data'
+    pprint.pprint(data)
+    return data
+
+def get_records_2(mongo_db, zone, no_parse=False, app=None, debug=False):
+    doc = mongo_db.dns_servers.find_one({'type': 'Master'})
+    data = { 'request': 'zone.get', 'zone': zone.get('zone'), 'view': zone.get('view') }
+    # z = dns.zone.from_xfr(dns.query.xfr(doc['ip'], zone))
+    res = execute_action(mongo_db, data, only_master=True, debug=debug)
+    print(res)
+    soa = res['data'][0]
+    records = res['data'][1]
+    return soa, records
+
+def parse_zone_2(r, mongo_db, session, no_records, app):
+    if not no_records:
+        try:
+            r['soa'], r['records'] = get_records_2(
+                mongo_db, r, app=app
+            )
+        except dns.exception.FormError:
+            data['data']['zones'].remove(r)
+            return False
+    doc = mongo_db.zones.find_one({'zone': r['zone']})
+    r['name'] = r['zone']
+    r['to_publish'] = 0
+    if session['user']['admin']:
+        docs = mongo_db.to_publish.find({'zone': r['zone'], 'published': False})
+    else:
+        docs = mongo_db.to_publish.find({'zone': r['zone'], 'user_id': session['user']['id'],
+            'published': False})
+    if docs:
+        r['to_publish'] = docs.count()
+    if 'records' not in r:
+        r['records'] = []
+
+    if doc and 'published' not in doc:
+        r['published'] = mongo_db.to_publish.find({'zone': r['zone'], 'published': True}).count()
+    else:
+        r['published'] = mongo_db.to_publish.find({'zone': r['zone'], 'published': True}).count()
+    if doc:
+        save = False
+        for key in r:
+            if key not in doc or r[key] != doc[key]:
+                doc[key] = r[key]
+                save = True
+        if save:
+            mongo_db.zones.save(doc)
+    else:
+        mongo_db.zones.save(r)
+        r['_id'] = str(r['_id'])
+    return r
+
+def get_all_zones_2(mongo_db, session, no_records=False, debug=False, no_cache=False, app=None):
+    user = session.get('user')
+    uid = user.get('id')
+    cache_query = {'app': 'get_all_zones', 'user': uid}
+    doc = mongo_db.cache.find_one(cache_query)
+    if doc:
+        doc['data']['cached'] = True
+        return doc['data']
+    data = {'request': 'show_zones'}
+    data = execute_action(mongo_db, data, only_master=True, debug=debug)
+    print 'Print execute_action!'
+    pprint.pprint(data)
+    print
+                  
+    zones = []
+    azones = None
+    user = mongo_db.users.find_one({'email': session['user']['email']})
+    print 'user'
+    pprint.pprint(user)
+    if not user['admin']:
+        azones = [x['name'] for x in user['zones']]
+    for r in data['data']['zones']:
+        if azones is not None:
+            if unicode(r['zone']) not in azones:
+                continue
+        print(r)
+        r = parse_zone_2(r, mongo_db, session, no_records, app)
         if r:
             zones.append(r)
     data['data']['zones'] = zones

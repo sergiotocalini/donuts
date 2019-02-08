@@ -25,8 +25,8 @@
     <link  href="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.css" rel="stylesheet">
     <script src="//cdn.corpam.com.ar/bootstrap-table/stable/bootstrap-table.js"></script>
 
-    <link  href="{{ config['CDN_MAVAPA'] }}/mavapa.css" rel="stylesheet">
-    <script src="{{ config['CDN_MAVAPA'] }}/mavapa.js"></script>
+    <link  href="{{ config['CDN_MAVAPA'] }}/app/css/mavapa.css" rel="stylesheet">
+    <script src="{{ config['CDN_MAVAPA'] }}/app/js/mavapa.js"></script>
     <style>
       .panel-default {
       border-color: white !important;
@@ -60,15 +60,12 @@
     margin-bottom: 20px !important;
     min-height: 200px;
 }
-</style>
-<script>
-{% include 'base.js' %}
-</script>
-{% block js %}
-
-
+    </style>
+    <script>
+      {% include 'base.js' %}
+    </script>
+    {% block js %}
     {% endblock %}
-
   </head>
   <body>
     <nav class="header-bar navbar navbar-default navbar-static-top">
@@ -161,10 +158,17 @@
     	  </a>
 	</li>
 	<li>
-    	  <a href="{{url_for('zones_publish')}}"
-    	     title="Unpublished" data-toggle="tooltip">
+    	  <a href="{{url_for('publish')}}"
+    	     title="Publish" data-toggle="tooltip">
     	    <i class="item fa fa-fw fa-clipboard" aria-hidden="true"></i>
     	    <span class="hiddeable">Publish</span>
+    	  </a>
+	</li>
+	<li>
+    	  <a href="{{ url_for('publish') }}"
+    	     title="Expiration" data-toggle="tooltip">
+    	    <i class="item fa fa-fw fa-calendar" aria-hidden="true"></i>
+    	    <span class="hiddeable">Expiration</span>
     	  </a>
 	</li>
 	<li>
@@ -186,7 +190,7 @@
 	    <li>
     	      <a href="{{ url_for('advanced_search')}}">
     		<i class="fa fa-fw fa-search" aria-hidden="true"></i>
-    		<span> Advanced Search</span>
+    		<span>Advanced Search</span>
     	      </a>
 	    </li>
 	    <li>
@@ -263,11 +267,11 @@
     <div class="footer-bar">
       <div class="content-bar">
 	<ul class="links">
-	  <span>
+	  <span style="padding-left: 0px;">
 	    <small>©&nbsp; 2016</small>
 	  </span>
 	  <li>
-	    <a href="http://developers.corpam.com.ar"><small>Developers</small></a>
+	    <a href=""><small>Developers</small></a>
 	  </li>
 	  <li>
 	    <a href=""><small>Support</small></a>

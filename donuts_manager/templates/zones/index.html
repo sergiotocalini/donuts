@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Zone: {{ ctx.zone }}{% endblock %}
+{% block title %}Zones{% endblock %}
 
 {% block main %}
 <div class="section-header" style="text-shadow: none !important;
@@ -17,35 +17,19 @@
 			    transform: translateY(-50%);
 			    width: 74%;">
     <i class="fa fa-fw fa-list" aria-hidden="true"></i>
-    Zone: {{ ctx.zone }}
+    Zones
   </div>
 </div>
 <div class="section-content" style="position:relative;width:100%;height:93%;overflow-y:auto;padding:0% 1%;">
-  <div id="toolbar-zone">
-    <a href="{{ url_for('publish') }}?zone={{ ctx.zone }}"
-       id="zone-to-publish"
-       class="publish btn btn-success" 
-       id="zone-to-publish-button">
-      <i class="fa fa-fw fa-arrow-up"></i>
-    </a>
-    <a href="#record-add"
-       data-zone="{{ ctx.zone }}" data-view="{{ ctx.view }}"
-       class="record-add btn btn-primary">
+  <div id="toolbar-zones">
+    <button class="btn btn-primary" type="button"
+	    id="zone-add" aria-haspopup="true"
+	    aria-expanded="false">
       <i class="fa fa-fw fa-plus"></i>
-    </a>
-    <a href="#"
-       data-zoneid="{{ ctx.zone }}"
-       class="delZone btn btn-danger"> 
-      <i class="fa fa-fw fa-trash"></i>
-    </a> 
-    <a  href="#" class="btn btn-default"
-	id="expiration-btn"
-	data-zoneid="{{ ctx.zone }}">
-      <i class="fa fa-fw fa-calendar"></i>
-    </a>
+    </button>
   </div>
-  <table id="table-zone"
-	 data-toolbar="#toolbar-zone"
+  <table id="table-zones"
+	 data-toolbar="#toolbar-zones"
 	 data-show-toggle="false" data-show-export="false"
 	 data-show-columns="true" data-show-multi-sort="true"
 	 data-sort-name="name" data-pagination="true"
@@ -53,45 +37,47 @@
 	 data-show-footer="false"
 	 data-escape="false" data-maintain-selected="true"
 	 data-show-refresh="true"
-	 data-url="{{url_for('api_zones')}}?"
-	 data-response-handler="ZoneResponseHandler"
-	 data-query-params="ZoneParams"
+	 data-url="{{ url_for('api_zones') }}?"
+	 data-response-handler="ZonesResponseHandler"
+	 data-query-params="ZonesParams"
 	 data-side-pagination="client"
 	 data-show-header="true" data-reorderable-columns="true"
 	 class="table-hover table-striped table-compact table-responsive
 		table-condensed table-autosize">
+
     <thead>
       <tr>
+	<th data-field="master" data-valign="middle"
+	    data-align="center" data-sortable="true">
+	  <i class="fa fa-fw fa-list"></i>
+	  Master
+	</th>
 	<th data-field="name" data-valign="middle"
-	    data-align="left" data-sortable="true">
+	    data-align="left" data-sortable="true"
+	    data-formatter="nameFormatter">
 	  <i class="fa fa-fw fa-list"></i>
 	  Name
 	</th>
-	<th data-field="type" data-valign="middle"
+	<th data-field="view" data-valign="middle"
 	    data-align="center" data-sortable="true">
 	  <i class="fa fa-fw fa-list"></i>
-	  Type
+	  View
 	</th>
-	<th data-field="value" data-valign="middle"
-	    data-align="left" data-sortable="true">
-	  <i class="fa fa-fw fa-list"></i>
-	  Value
-	</th>
-	<th data-field="ttl" data-valign="middle"
+	<th data-field="owner" data-valign="middle"
 	    data-align="center" data-sortable="true">
-	  <i class="fa fa-fw fa-time"></i>
-	  TTL
+	  <i class="fa fa-fw fa-list"></i>
+	  Owner
 	</th>
-	<th data-field="action" data-valign="middle"
-	    data-align="center" data-sortable="true"
-	    data-formatter="actionsFormatter">
-	  <i class="fa fa-fw fa-cog"></i>
+	<th data-field="published" data-valign="middle"
+	    data-align="center" data-sortable="true">
+	  <i class="fa fa-fw fa-list"></i>
+	  Changes
 	</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>
-</div> 	
+</div>
 {% endblock %}
 
 {% block modals %} 
@@ -105,6 +91,7 @@
 {% include "libs.js" %}
 {% include "js/common.js" %}
 {% include "zones/libs.js" %}
-{% include "zones/zone.js" %}
+{% include "zones/index.js" %}
 </script>
 {% endblock %}
+

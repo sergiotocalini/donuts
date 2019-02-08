@@ -1,9 +1,10 @@
-function addRecord(zone){
+function addRecord(zone, view){
     $('#AddRecordModalZoneName').html('Add Record to ' + zone);
     $('.ZoneNameTag').html(zone);
     $('#AddRecordForm').html('');
     $('#AddRecordForm').html($('.AddRecordFormTemplate').html());
-    $('#AddRecordForm').find('#zone_id').val(zone);
+    $('#AddRecordForm').find('#zone').val(zone);
+    $('#AddRecordForm').find('#view').val(view);
     $('#AddRecordModal').modal('show');
     $( "#btnAddRecord" ).unbind();
     $('#btnAddRecord').on('click', function(event){
@@ -27,7 +28,7 @@ function sendAddRecord(event){
     var url = "{{url_for('add_record')}}";
     var data = {};
     $(form).serializeArray().map(function(x){data[x.name] = x.value;});
-
+    console.log(data);
     $.ajax({
 	url: url,
 	type: "POST",
@@ -36,7 +37,7 @@ function sendAddRecord(event){
 	success: function(request){
 	    hideAddRecordModal();
 	    var url = "{{url_for('zone_page', zone='zone-name')}}";
-	    url = url.replace('zone-name', value);
+	    url = url.replace('zone-name', data['zone']);
 	    window.location.replace(url);
     	},
 	error: function(request){
@@ -47,7 +48,6 @@ function sendAddRecord(event){
 	}
     });
 }
-
 
 function hideAddRecordModal(){
     $('#AddRecordModal').modal('hide');
