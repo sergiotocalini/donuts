@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}History{% endblock %}
+{% block title %}Unpublished{% endblock %}
 
 {% block main %}
 <div class="section-header" style="text-shadow: none !important;
@@ -16,13 +16,25 @@
 			    top: 50%;
 			    transform: translateY(-50%);
 			    width: 74%;">
-    <i class="fa fa-fw fa-history" aria-hidden="true"></i>
-    History
+    <i class="fa fa-fw fa-clipboard" aria-hidden="true"></i>
+    Unpublished
   </div>
 </div>
 <div class="section-content" style="position:relative;width:100%;height:93%;overflow-y:auto;padding:0% 1%;">
-  <table id="table-history"
-	 data-toolbar="#toolbar-zones"
+  <div id="toolbar-unpublished">
+    <button class="btn btn-success" type="button"
+	    id="bulk-publish" aria-haspopup="true"
+	    aria-expanded="false">
+      <i class="fa fa-fw fa-arrow-up"></i>
+    </button>
+    <button class="btn btn-danger" type="button"
+	    id="bulk-delete" aria-haspopup="true"
+	    aria-expanded="false">
+      <i class="fa fa-fw fa-trash"></i>
+    </button>
+  </div>  
+  <table id="table-unpublished"
+	 data-toolbar="#toolbar-unpublished"
 	 data-show-toggle="false" data-show-export="false"
 	 data-show-columns="true" data-show-multi-sort="true"
 	 data-sort-name="date" data-sort-order="desc"
@@ -31,52 +43,56 @@
 	 data-show-footer="false"
 	 data-escape="false" data-maintain-selected="true"
 	 data-show-refresh="true"
-	 data-url="{{ url_for('api_publish') }}?status=true"
-	 data-response-handler="HistoryResponseHandler"
-	 data-query-params="HistoryParams"
+	 data-url="{{ url_for('api_publish') }}?status=false"
+	 data-response-handler="UnpublishedResponseHandler"
+	 data-query-params="UnpublishedParams"
 	 data-side-pagination="client"
 	 data-show-header="true" data-reorderable-columns="true"
 	 class="table-hover table-striped table-compact table-responsive
 		table-condensed table-autosize">
     <thead>
       <tr>
+	<th data-field="select" data-visible="true"
+	    data-checkbox="true">
+	  <i class="fa fa-fw fa-check-square"></i>
+	</th>	
 	<th data-valign="middle" data-align="center" data-field="date"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterDate">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterDate">
 	  <i class="fa fa-fw fa-calendar"></i>
 	  Date
 	</th>
 	<th data-valign="middle" data-align="center" data-field="action"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterAction">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterAction">
 	  <i class="fa fa-fw fa-bolt"></i>
 	  Action
 	</th>
 	<th data-valign="middle" data-align="left" data-field="master"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterMaster">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterMaster">
 	  <i class="fa fa-fw fa-shield"></i>
 	  Master
 	</th>
 	<th data-valign="middle" data-align="left" data-field="view"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterView">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterView">
 	  <i class="fa fa-fw fa-eye"></i>
 	  View
 	</th>
 	<th data-valign="middle" data-align="left" data-field="zone"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterZone">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterZone">
 	  <i class="fa fa-fw fa-cube"></i>
 	  Zone
 	</th>
 	<th data-valign="middle" data-align="left" data-field="name"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterName">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterName">
 	  <i class="fa fa-fw fa-list"></i>
 	  Name
 	</th>
 	<th data-valign="middle" data-align="left" data-field="owner"
-	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterOwner">
+	    data-halign="center" data-sortable="true" data-formatter="UnpublishedFormatterOwner">
 	  <i class="fa fa-fw fa-user"></i>
 	  Owner
 	</th>
 	<th data-valign="middle" data-align="center" data-field="actions"
-	    data-halign="center" data-formatter="HistoryFormatterActions">
+	    data-halign="center" data-formatter="UnpublishedFormatterActions">
 	  <i class="fa fa-fw fa-cog"></i>
 	</th>
       </tr>
@@ -87,7 +103,6 @@
 {% endblock %}
 
 {% block modals %}
-{% include "history/modals/log.html" %}
 {% endblock %}
 
 {% block js%}
@@ -95,7 +110,6 @@
 
 <script>
 {% include "js/common.js" %}
-{% include "history/index.js" %}
-{% include "history/modals/log.js" %}
+{% include "unpublished/index.js" %}
 </script>
 {% endblock %}

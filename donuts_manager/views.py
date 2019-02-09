@@ -12,13 +12,14 @@ from datetime import timedelta
 import datetime
 from functools import wraps
 from urllib2 import Request, urlopen, URLError
-from flask import Flask, request, render_template, g, redirect, url_for
-from flask import abort, redirect, session
-from utils import execute_action, agent_call, get_records, get_records_2, get_all_zones, get_all_zones_2, make_rnd_str, record_format
+from flask import Flask, request, render_template, jsonify
+from flask import url_for, abort, redirect, session
+from utils import execute_action, agent_call, get_records
+from utils import get_records_2, get_all_zones, get_all_zones_2, make_rnd_str, record_format
 from utils import MasterConnectionFail, SlaveConnectionFail
 from mavapa import mavapa, get_user_data
 from bson.objectid import ObjectId
-import datetime
+from datetime import datetime
 from IPy import IP
 
 app = Flask(__name__, instance_relative_config=True)
@@ -160,12 +161,12 @@ def parse_dname(data):
 def before():
     refresh_user = False
     if 'last_update' not in session:
-        session['last_update'] = datetime.datetime.now()
+        session['last_update'] = datetime.now()
         refresh_user = True
     else:
-        if (datetime.datetime.now() - session['last_update']).seconds > 60:
+        if (datetime.now() - session['last_update']).seconds > 60:
             refresh_user = True
-            session['last_update'] = datetime.datetime.now()
+            session['last_update'] = datetime.now()
     if 'user' in session and refresh_user:
         if update_user() is None:
             return redirect(url_for('mavapa.logout'))
@@ -357,7 +358,7 @@ def zone_expiration():
                 zone['account'] = request.form.get('account', '')
                 zone['comments'] = request.form.get('comments', '')
                 expiration = request.form.get('expiration')
-                zone['expiration'] = datetime.datetime.strptime(expiration, '%d/%m/%Y')
+                zone['expiration'] = datetime.strptime(expiration, '%d/%m/%Y')
                 mongo_db.zones.save(zone)
             if 'expiration' in zone and zone['expiration']:
                 zone['expiration'] = zone['expiration'].strftime('%d/%m/%Y')
@@ -370,7 +371,7 @@ def zone_expiration():
 @login_required
 def expirations_list():
     expirations = []
-    today = datetime.datetime.now() 
+    today = datetime.now() 
     last_days = today + datetime.timedelta(days=45)
     query = {"expiration": {'$exists':1}, "expiration": {"$lt": last_days}}
     for e in mongo_db.zones.find(query).sort([('expiration', pymongo.ASCENDING)]):
@@ -419,7 +420,7 @@ def publish_this():
                     pprint.pprint(out)
                     d['action_logs'].append(out)
                 d['published'] = True
-                d['published_datetime'] = datetime.datetime.now()
+                d['published_datetime'] = datetime.now()
                 username = session['user']['email']
                 if 'displayname' in session['user'] and session['user']['displayname']:
                     username = session['user']['displayname']
@@ -433,23 +434,6 @@ def publish_this():
             cache_query = {'app': 'get_all_zones'}
             mongo_db.cache.delete_many(cache_query)
     return 'ok'
-
-
-@app.route('/publish')
-@login_required
-def publish():
-    zone = request.args.get('zone', None)
-    query = {'published': False}
-    ctx = {'app_name': 'to_publish'}
-    if not session['user']['admin']:
-        query['user_id'] = session['user']['id']
-    if zone:
-        ctx['zone'] = zone
-        query['zone'] = zone
-    docs = list(mongo_db.to_publish.find(query))
-    if docs:
-        ctx['to_publish'] = docs
-    return render_template('publish/index.html', ctx=ctx) 
 
 
 @app.route('/zone/publish_remove/')
@@ -468,17 +452,22 @@ def publish_remove():
     return 'ok'
 
 
-@app.route('/history')
+@app.route('/api/publish')
 @login_required
-def history():
-    zone = request.args.get('zone', None)  
-    query = {'published': True}
-    if zone:
-        query['zone'] = zone
+def api_publish():
+    zone = request.args.get('zone')
+    status = request.args.get('status')
+    data = []
+    query = {}
+    if status:
+        query['published'] = True if status not in ['no', 'false', 'f'] else False
     if not session['user']['admin']:
         query['user_id'] = session['user']['id']
-    docs = list(mongo_db.to_publish.find(query).sort([('published_datetime', pymongo.DESCENDING)]))
+    if zone:
+        query['zone'] = zone
+    docs = list(mongo_db.to_publish.find(query).sort([('published_datetime', pymongo.ASCENDING)]))
     for d in docs:
+        d['_id'] = str(d['_id'])
         d['out'] = ''
         if 'action_logs' in d:
             for cn, s in enumerate(d['action_logs']):
@@ -486,9 +475,21 @@ def history():
                 if 'status' in s:
                     s['status'] = s['status'].replace('\n\n', '\n')
                     s['status'] = s['status'].replace('\n\n', '\n')
-                    d['out'] += s['status']
-    ctx = {'published': docs, 'app_name': 'Published'}
-    return render_template('history/index.html', ctx=ctx)
+                    d['out'] += s['status']        
+        data.append(d)
+    return jsonify(datetime=datetime.now(), data=data)
+
+
+@app.route('/unpublished')
+@login_required
+def unpublished():
+    return render_template('unpublished/index.html', ctx={'app_name': 'to_publish'}) 
+
+
+@app.route('/history')
+@login_required
+def history():
+    return render_template('history/index.html', ctx={'app_name': 'Published'})
 
 
 @app.route('/zones/')
@@ -622,7 +623,7 @@ def ddns_update():
         ip = False
     if doc and ip:
         if 'last_update' in doc:
-            if (datetime.datetime.now() - doc['last_update']).seconds < 120:
+            if (datetime.now() - doc['last_update']).seconds < 120:
                 return 'requests exceeded'
         soa, rdata = get_records(mongo_db, doc['zone'], no_parse=True)
         exists = False
@@ -644,7 +645,7 @@ def ddns_update():
                 actions.append(data)
                 for action in actions:
                     execute_action(mongo_db, action, only_master=True)
-                doc['last_update'] = datetime.datetime.now()
+                doc['last_update'] = datetime.now()
                 doc['ip'] = ip
                 mongo_db.ddns.save(doc)
                 exists = True
@@ -660,7 +661,7 @@ def ddns_update():
             actions.append(data)
             for action in actions:
                 execute_action(mongo_db, action, only_master=True)
-            doc['last_update'] = datetime.datetime.now()
+            doc['last_update'] = datetime.now()
             doc['ip'] = ip
             mongo_db.ddns.save(doc)
 
@@ -820,7 +821,7 @@ def api_zones():
             data = get_all_zones_2(mongo_db, session, app=app)
         except Exception as e:
             print e
-    return flask.jsonify(data)
+    return jsonify(data)
     
 
 @app.route('/api/zones/')
@@ -845,7 +846,7 @@ def show_zones():
             data = get_all_zones(mongo_db, session, app=app)
         except Exception as e:
             print e
-    return flask.jsonify(data)
+    return jsonify(data)
 
 
 @app.route('/api/zones/add_zone/', methods=['GET', 'POST'])
@@ -862,7 +863,7 @@ def add_zone():
     execute_action(mongo_db, data, only_slaves=True)
     cache_query = {'app': 'get_all_zones'}
     mongo_db.cache.delete_many(cache_query)
-    return flask.jsonify(data)
+    return jsonify(data)
 
 
 @app.route('/api/zones/del_zone/', methods=['GET', 'POST'])
@@ -878,7 +879,7 @@ def remove_zone():
     mongo_db.zones.delete_many({'zone': zone})
     cache_query = {'app': 'get_all_zones'}
     mongo_db.cache.delete_many(cache_query)
-    return flask.jsonify(data)
+    return jsonify(data)
 
 
 @app.route('/api/zones/record/add/', methods=['GET', 'POST'])
@@ -896,7 +897,7 @@ def add_record():
             tmp = tmp.strip()
         data[k] = tmp
     if errors['errors']:
-        r = flask.jsonify(errors)
+        r = jsonify(errors)
         r.status_code = 400
         return r
     print '#' * 80
@@ -924,7 +925,7 @@ def add_record():
     doc['user'] = session['user']
     doc['published'] = False
     mongo_db['to_publish'].save(doc)
-    return flask.jsonify(data)
+    return jsonify(data)
 
 
 @app.route('/api/zones/record/edit/', methods=['GET', 'POST'])
@@ -939,7 +940,7 @@ def edit_record():
         if not tmp:
             error = (k, 'missing')
             errors['errors'].append(error)
-            r = flask.jsonify(errors)
+            r = jsonify(errors)
             r.status_code = 400
             return r
 
@@ -973,7 +974,7 @@ def edit_record():
     doc['user'] = session['user']
     doc['published'] = False
     mongo_db['to_publish'].save(doc)
-    return flask.jsonify(data)
+    return jsonify(data)
 
 
 @app.route('/api/zones/record/remove/', methods=['GET', 'POST'])
@@ -989,7 +990,7 @@ def remove_record():
             errors['errors'].append(error)
         data[k] = tmp
     if errors['errors']:
-        r = flask.jsonify(errors)
+        r = jsonify(errors)
         r.status_code = 400
         return r
 
@@ -1015,7 +1016,7 @@ def remove_record():
     doc['user'] = session['user']
     doc['published'] = False
     mongo_db['to_publish'].save(doc)
-    return flask.jsonify(data)
+    return jsonify(data)
 
 
 if __name__ == "__main__":

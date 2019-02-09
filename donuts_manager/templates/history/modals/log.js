@@ -1,4 +1,3 @@
-
 function jqlisteners_history_modal_log() {
     $(".history-log").unbind();
     $(".history-log").click(function(e) {
