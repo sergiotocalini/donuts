@@ -18,7 +18,6 @@ def agent_call(path, secret_key, action):
     return data
 
 def execute_action(mongo_db, action, only_master=False, only_slaves=False, debug=False):
-
     data = []
     if only_master:
         try:
@@ -27,13 +26,12 @@ def execute_action(mongo_db, action, only_master=False, only_slaves=False, debug
             data = agent_call(doc['path'], doc['secret_key'], action)
             doc['last_update'] = datetime.datetime.now()
             mongo_db.dns_servers.save(doc)
-            if True:
+            if debug:
                 pprint.pprint(data)
         except Exception as e:
             raise MasterConnectionFail
     if only_slaves:
             for slave in mongo_db.dns_servers.find({'type': 'Slave'}):
-
                 try:
                     data += [agent_call(slave['path'], slave['secret_key'], action)]
                 except Exception as e:
@@ -211,21 +209,18 @@ def parse_zone_2(r, mongo_db, session, no_records, app):
             return False
     doc = mongo_db.zones.find_one({'zone': r['zone']})
     r['name'] = r['zone']
-    r['to_publish'] = 0
-    if session['user']['admin']:
-        docs = mongo_db.to_publish.find({'zone': r['zone'], 'published': False})
-    else:
-        docs = mongo_db.to_publish.find({'zone': r['zone'], 'user_id': session['user']['id'],
-            'published': False})
-    if docs:
-        r['to_publish'] = docs.count()
+
+    query = { 'zone': r['zone'], 'published': False }
+    if not session['user']['admin']:
+        query['user_id'] = session['user']['id']        
+    r['to_publish'] = mongo_db.to_publish.find(query).count()
+
+    query['published'] = True
+    r['published'] = mongo_db.to_publish.find(query).count()
+    
     if 'records' not in r:
         r['records'] = []
 
-    if doc and 'published' not in doc:
-        r['published'] = mongo_db.to_publish.find({'zone': r['zone'], 'published': True}).count()
-    else:
-        r['published'] = mongo_db.to_publish.find({'zone': r['zone'], 'published': True}).count()
     if doc:
         save = False
         for key in r:
@@ -249,22 +244,16 @@ def get_all_zones_2(mongo_db, session, no_records=False, debug=False, no_cache=F
         return doc['data']
     data = {'request': 'show_zones'}
     data = execute_action(mongo_db, data, only_master=True, debug=debug)
-    print 'Print execute_action!'
-    pprint.pprint(data)
-    print
                   
     zones = []
     azones = None
     user = mongo_db.users.find_one({'email': session['user']['email']})
-    print 'user'
-    pprint.pprint(user)
     if not user['admin']:
         azones = [x['name'] for x in user['zones']]
     for r in data['data']['zones']:
         if azones is not None:
             if unicode(r['zone']) not in azones:
                 continue
-        print(r)
         r = parse_zone_2(r, mongo_db, session, no_records, app)
         if r:
             zones.append(r)
@@ -274,8 +263,6 @@ def get_all_zones_2(mongo_db, session, no_records=False, debug=False, no_cache=F
     cache_query['last_update'] = datetime.datetime.now()
     mongo_db.cache.save(cache_query)
     data['data']['cached'] = False
-    print 'data'
-    pprint.pprint(data)
     return data
 
 def make_rnd_str(l=10):

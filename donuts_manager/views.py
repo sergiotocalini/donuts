@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import os
 import re
-import flask
 import sys
 import json
 import pprint
@@ -35,7 +34,6 @@ mongo_db = mongo_client[app.config['MONGO_DB']]
 if not app.config.has_key('CDN_LOCAL'):
     app.config['CDN_LOCAL'] = '%s/static' %app.config.get('APPLICATION_ROOT', '')
 
-    
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -157,6 +155,12 @@ def parse_dname(data):
     return data
 
 
+@app.route('/fresh_u/')
+def fresh_user():
+    update_user()
+    return redirect(url_for('inactive'))
+
+
 @app.before_request
 def before():
     refresh_user = False
@@ -171,7 +175,7 @@ def before():
         if update_user() is None:
             return redirect(url_for('mavapa.logout'))
 
-
+        
 @app.route('/')
 @login_required
 def index():
@@ -190,30 +194,10 @@ def index():
 
     return render_template('dashboard.html', ctx=ctx)
 
-        
-@app.route('/fresh_u/')
-def fresh_user():
-    update_user()
-    return redirect(url_for('inactive'))
-
 
 @app.route('/logout')
 def logout():
     return redirect(url_for('mavapa.logout'))
-
-
-@app.route('/admin/users/')
-@login_required
-def admin():
-    if 'admin' in session['user'] and session['user']['admin']:
-        users = mongo_db.users.find()
-    else:
-        users = mongo_db.users.find({'admin': False})  
-    ctx = {'app_name': 'admin'}
-    users = list(users)
-    ctx['users'] = users
-    ctx['users_cn'] = len(users)
-    return render_template('admin/index.html', ctx=ctx)
 
 
 @app.route('/inactive/')
@@ -223,6 +207,43 @@ def inactive():
         return render_template('inactive.html', ctx={})
     else:
         return redirect(url_for('index'))    
+
+
+@app.route('/admin/users')
+@login_required
+def admin_users(section, sub):
+    return render_template('admin/users/index.html', ctx={'app_name': 'admin'})
+
+
+@app.route('/admin/user/<userid>', defaults={'userid': 'me'})
+@login_required
+def admin_user(userid):
+    return render_template('admin/user/index.html', ctx={'app_name': 'admin', 'id': userid})
+
+
+@app.route('/admin/user/old/')
+@login_required
+def edit_user():
+    user_id = request.args.get('user_id', None)
+    if user_id:
+        user = mongo_db.users.find_one({'id': user_id})
+        if user:
+            data = get_all_zones(mongo_db, session, no_records=True)
+            z = data['data']['zones']
+            d = dict([(d['zone'], d) for d in z])
+            zones = []
+            for k in z:
+                k['name'] = k['zone']
+            if 'admin' in session['user'] and not session['user']['admin']:
+                for k in session['user']['zones']:
+                    if k['admin']:
+                        if k['name'] in d:
+                            zones.append(d[k['name']])
+            elif 'admin' in session['user'] and session['user']['admin']:
+                zones = z
+            ctx={'user': user, 'zones': zones, 'app_name': 'admin'} 
+            return render_template('admin/user/index.html', ctx=ctx)
+    return redirect(url_for('admin'))
 
 
 @app.route('/admin/agents', methods=['GET', 'POST'])
@@ -311,32 +332,7 @@ def admin_ddns():
             execute_action(mongo_db, data, only_master=True)
     ddns = mongo_db.ddns.find()
     ctx = {'app_name': 'ddns_admin', 'ddns': ddns}
-    return render_template('admin/ddns.html', ctx=ctx)
-
-
-@app.route('/admin/edit_user/')
-@login_required
-def edit_user():
-    user_id = request.args.get('user_id', None)
-    if user_id:
-        user = mongo_db.users.find_one({'id': user_id})
-        if user:
-            data = get_all_zones(mongo_db, session, no_records=True)
-            z = data['data']['zones']
-            d = dict([(d['zone'], d) for d in z])
-            zones = []
-            for k in z:
-                k['name'] = k['zone']
-            if 'admin' in session['user'] and not session['user']['admin']:
-                for k in session['user']['zones']:
-                    if k['admin']:
-                        if k['name'] in d:
-                            zones.append(d[k['name']])
-            elif 'admin' in session['user'] and session['user']['admin']:
-                zones = z
-            ctx={'user': user, 'zones': zones, 'app_name': 'admin'} 
-            return render_template('admin/edit_user.html', ctx=ctx)
-    return redirect(url_for('admin'))
+    return render_template('admin/ddns/index.html', ctx=ctx)
 
 
 @app.route('/server_error')
@@ -452,6 +448,52 @@ def publish_remove():
     return 'ok'
 
 
+@app.route('/api/admin/users')
+@login_required
+def api_admin_users():
+    _id = request.args.get('id', False)
+    data = []
+    query = {}
+    if _id:
+        query['_id'] = ObjectId(_id)
+    if request.method == 'GET':
+        for d in mongo_db.users.find(query):
+            d['_id'] = str(d['_id'])
+            data.append(d)
+        return jsonify(datetime=datetime.now(), data=data)
+    elif query.has_key('_id'):
+        doc = mongo_db.users.find_one(query)
+        if request.method == 'DELETE':
+            if session['user']['admin']:
+                mongo_db.users.remove(doc)
+    else:
+        abort(404)
+    return jsonify(datetime=datetime.now())
+    
+
+@app.route('/api/admin/ddns', methods=['GET', 'POST', 'PUT', 'DELETE'])
+@login_required
+def api_admin_ddns():
+    _id = request.args.get('id', False)
+    data = []
+    query = {}
+    if _id:
+        query['_id'] = ObjectId(_id)
+    if request.method == 'GET':
+        for d in mongo_db.ddns.find(query):
+            d['_id'] = str(d['_id'])
+            data.append(d)
+        return jsonify(datetime=datetime.now(), data=data)
+    elif query.has_key('_id'):
+        doc = mongo_db.ddns.find_one(query)
+        if request.method == 'DELETE':
+            if session['user']['admin'] or session['user']['id'] == doc['user']:
+                mongo_db.ddns.remove(doc)
+    else:
+        abort(404)
+    return jsonify(datetime=datetime.now())
+
+
 @app.route('/api/publish')
 @login_required
 def api_publish():
@@ -529,7 +571,23 @@ def zone_page(zone) :
             ctx['zone'] = zone
         else:
            return redirect(url_for('index')) 
-    return render_template('zones/zone.html', ctx=ctx)
+    return render_template('zone/index.html', ctx=ctx)
+
+
+@app.route('/zone/<master>/<view>/<zone>')
+@login_required
+def zone(master, view, zone):
+    if master and view and zone:
+        allow = False
+        if not session['user']['admin']:
+            for z in session['user']['zones']:
+                if z['name'] == zone and z['view'] == view and z['master'] == master:
+                    allow = True
+                    break
+        if allow or session['user']['admin']:
+            ctx = { 'app_name': 'index', 'zone': zone, 'view': view, 'master': master }
+            return render_template('zones/zone.html', ctx=ctx)
+    return redirect(url_for('zones_list'))
 
 
 @app.route('/advanced_search/')
@@ -586,29 +644,6 @@ def delete_dns():
     doc = mongo_db.dns_servers.find_one({'_id': ObjectId(_id)})
     if doc:
         mongo_db.dns_servers.remove(doc)
-    return 'ok'
-
-
-@app.route('/api/admin/ddns/delete/')
-@login_required
-@admin_privs
-def delete_ddns():
-    _id = request.args.get('id', False)
-    doc = mongo_db.ddns.find_one({'_id': ObjectId(_id)})
-    if doc:
-        if session['user']['admin'] or session['user']['id'] == doc['user']:
-
-            soa, data = get_records(mongo_db, doc['zone'], no_parse=True)
-            for r in data:
-                if r['name'] == doc['name']:
-                    zone = doc.get('zone')
-                    data = {
-                        'request': 'update_zone', 'action': 'del', 'zone': zone,
-                        'ttl': r.get('ttl'), 'name': doc.get('name'),
-                        'value': r.get('value'), 'type': r.get('type')
-                    }
-                    execute_action(mongo_db, data, only_master=True)
-            mongo_db.ddns.remove(doc)
     return 'ok'
 
 
@@ -808,13 +843,13 @@ def api_zones():
     if zone:
         soa, records = get_records_2(mongo_db, {'zone': zone, 'view': view})
         records = sorted(records, key=lambda k: k['type'])
-        data = {'records': records}
+        data = { 'records': records }
+        query = {
+            'zone': zone, 'published': False
+        }
         if not session['user']['admin']:
-            docs = mongo_db.to_publish.find({
-                'zone': zone, 'user_id': session['user']['id'], 'published': False
-            })
-        else:
-            docs = mongo_db.to_publish.find({'zone': zone, 'published': False})
+            query['user_id'] = session['user']['id']
+        docs = mongo_db.to_publish.find(query)
         data['to_publish'] = docs.count()
     else:
         try:
@@ -853,15 +888,16 @@ def show_zones():
 @login_required
 def add_zone():
     data = {'request': 'add_zone'}
-    data['zone'] = request.args.get('zone_name', None)
+    data['zone'] = request.args.get('zone', None)
     data['view'] = request.args.get('view', None)
+    data['master_id'] = request.args.get('master', None)
     data['master'] = True
-    doc = mongo_db.dns_servers.find_one({'type': 'Master'})
+    doc = mongo_db.dns_servers.find_one({ 'type': 'Master', '_id': ObjectId(data['master_id']) })
     data['master_host'] = doc['ip']
     execute_action(mongo_db, data, only_master=True)
     data['master'] = False
     execute_action(mongo_db, data, only_slaves=True)
-    cache_query = {'app': 'get_all_zones'}
+    cache_query = { 'app': 'get_all_zones' }
     mongo_db.cache.delete_many(cache_query)
     return jsonify(data)
 
@@ -916,8 +952,10 @@ def add_record():
     pprint.pprint(data)
     zone = data['zone']
     #doc = mongo_db['to_publish'].find_one({'zone': zone})
-    doc = {'zone': zone, 'actions': []}
+    doc = {'zone': zone, 'view': data['view'], 'actions': []}
     doc['actions'].append(data)
+    doc['created_on'] = datetime.now()
+    doc['created_by'] = session['user']['id']
     doc['note'] = data['note']
     doc['name'] = data.get('name')
     doc['action'] = 'Add'
@@ -1017,6 +1055,33 @@ def remove_record():
     doc['published'] = False
     mongo_db['to_publish'].save(doc)
     return jsonify(data)
+
+
+@app.route('/api/admin/agents', methods=['GET', 'POST'])
+@login_required
+@admin_privs
+def api_admin_agents():
+    args = request.args.to_dict()
+    args.setdefault('type', None)
+    args.setdefault('extend', False)
+    data = []
+    qfilter = ['type', 'master', 'ip']
+    query = dict((f, args[f]) for f in qfilter if args.get(f))
+    if request.method == 'GET':
+        res = mongo_db.dns_servers.find(query).sort([('name', pymongo.ASCENDING)])
+        for agent in res:
+            agent['_id'] = str(agent['_id'])            
+            if args['extend'] in ["yes", "true", "t", "1", "True"]:
+                try:
+                    zones = agent_call(
+                        agent['path'], agent['secret_key'],
+                        { 'request': 'show_zones' }
+                    )
+                    agent['zones'] = [d['zone'] for d in zones['data']['zones']]
+                except:
+                    pass
+            data.append(agent)
+    return jsonify(datetime=datetime.now(), data=data)
 
 
 if __name__ == "__main__":

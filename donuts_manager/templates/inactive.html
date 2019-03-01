@@ -1,42 +1,61 @@
+<!doctype html>
 <html>
   <head>
-  <title> donuts - Unauthorized</title>
-  
-    <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon"/> 
-    <link type="text/css" rel="stylesheet" href="//fonts.googleapis.com/css?family=Open+Sans:400italic,400,300,700">
-    <link type="text/css" rel="stylesheet" href="/fonts.googleapis.com/css?family=Oswald:400,700,300">
-    <link href="//cdn.corpam.com.ar/bootstrap/stable/css/bootstrap.min.css" rel="stylesheet">
-    <link href="//cdn.corpam.com.ar/bootstrap/stable/css/bootstrap-theme.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="{{url_for('static', filename='css/style.css')}}">
-  
-    <script src="//cdn.corpam.com.ar/common/stable/js/jquery.min.js"></script>
+    <title>DoNutS - Unauthorized</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {% include "__include__/jquery.html" %}
+    {% include "__include__/bootstrap.html" %}
+    {% include "__include__/fontawesome.html" %}
+    {% include "__include__/mavapa.html" %}
 
+    <link href="{{ url_for('static', filename='app/img/favicon.ico') }}" rel="shortcut icon" type="image/x-icon"/>
+    <link href="{{ url_for('static', filename='app/css/style.old.css') }}" rel="stylesheet">
   </head>
   <body>
-  <div id="unauth">
-    <div class="banner" style="background-image: url('{{ url_for('static', filename="img/unauthorized.jpg") }}');">
-        <!-- <img class="logo" src='{{ url_for('static', filename="img/logo.png") }}' aria-hidden="true"/> -->
-    </div>
-    <div class="info">
+    <div id="unauth">
+      <div class="banner" style="background-image: url('{{ url_for('static', filename="app/img/unauthorized.jpg") }}');">
+        <!-- <img class="logo" src='{{ url_for('static', filename="app/img/logo.png") }}' aria-hidden="true"/> -->
+      </div>
+      <div class="info">
         <div class="account box-content right">
-            <div class="signed">You are signed in as:</div>
-            <div class="profile">
-                <img src="{{ session.user.avatar }}" aria-hidden="true">
-                <div class="details">
-                    <p class="display">{{ session.user.displayname }}</p>
-                    <p class="email">{{ session.user.email }}</p>
-                </div>
-                <a class="logout" href="{{ url_for('mavapa.logout') }}">Sign out</a>
+          <div class="signed">You are signed in as:</div>
+          <div class="profile">
+            <img src="{{ session.user.avatar }}" aria-hidden="true">
+            <div class="details">
+	      <p class="display">{{ session.user.displayname }}</p>
+	      <p class="email">{{ session.user.email }}</p>
             </div>
+            <a class="logout" href="{{ url_for('mavapa.logout') }}">Sign out</a>
+          </div>
         </div>
         <div class="divider-vert"></div>
         <div class="message">
-            <p class="title">Sorry!</p>
-            <p class="content">This is a restricted area and your account is not authorized to use this application.</p>
+          <p class="title">Sorry!</p>
+          <p class="content">This is a restricted area and your account is not authorized to use this application.</p>
         </div>
+      </div>
     </div>
-</div>
-{% include 'footer.html'%}
-</body>
+    <div class="footer-bar">
+      <div class="content-bar">
+	<ul class="links">
+	  <span>
+            <small>©&nbsp; 2016-2019</small>
+	  </span>
+	  <li>
+            <a href=""><small>Developers</small></a>
+	  </li>
+	  <li>
+            <a href=""><small>Support</small></a>
+	  </li>
+	  <li>
+            <a href=""><small>Privacy</small></a>
+	  </li>
+	  <li>
+            <a href=""><small>Terms</small></a>
+	  </li>
+	</ul>
+      </div>
+    </div>
+  </body>
 </html>

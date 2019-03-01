@@ -62,10 +62,10 @@ function UnpublishedFormatterOwner(value, row) {
 
 function UnpublishedFormatterActions(value, row) {
     var html = '';
-    html += '<a href="#publish" data-id="' + row.id + '">';
+    html += '<a href="#publish" data-click="publish" data-id="' + row.id + '">';
     html += ' <i class="fa fa-arrow-up"></i>';
     html += '</a>';
-    html += '<a href="#delete" data-id="' + row.id + '">';
+    html += '<a href="#delete" data-click="delete" data-id="' + row.id + '">';
     html += ' <i class="fa fa-trash"></i>';
     html += '</a>';
     return html;
@@ -82,7 +82,7 @@ function UnpublishedResponseHandler(res) {
     	data.push({
     	    name: row.name,
 	    view: row.view,
-    	    date: row.published_datetime,
+    	    date: row.created_on,
 	    owner: row.user,
 	    master: row.master,
 	    zone: row.zone,
@@ -93,8 +93,39 @@ function UnpublishedResponseHandler(res) {
     return data;
 };
 
+function UnpublishedActions(action, id) {
+    var table = "#table-unpublished";
+    var url = null;
+    if (action == 'delete') {
+	url = "{{ url_for('publish_remove') }}?id=" + id;
+    } else if (action == 'publish') {
+	url = "{{ url_for('publish_this') }}?id=" + id;
+    }
+
+    if (url !== null) {
+	console.log(url);
+	$.ajax({
+	    url: url,
+	    type: 'GET',
+	    contentType: "application/json",
+	    success: function(e) {
+		$(table).bootstrapTable('remove', {'field': 'id', 'values': [id] });
+	    }
+	});
+    }    
+}
+
 function jqlisteners() {
-    console.log('entro');
+    $('#table-unpublished a[data-click=publish]').unbind();
+    $('#table-unpublished a[data-click=publish]').click(function(e) {
+	e.preventDefault();
+	UnpublishedActions('publish', $(this).data('id'))
+    });
+    $('#table-unpublished a[data-click=delete]').unbind();
+    $('#table-unpublished a[data-click=delete]').click(function(e) {
+	e.preventDefault();
+	UnpublishedActions('delete', $(this).data('id'))
+    });
 };
 
 $(document).ready(function() {
@@ -102,4 +133,34 @@ $(document).ready(function() {
 	autosize_tables();
     });
     autosize_tables();
+    $("#toolbar-unpublished button[data-click=publish-bulk]").on("click", function(a) {
+	a.preventDefault();
+	var table = "#table-unpublished";
+	var selected = $(table).bootstrapTable('getAllSelections');
+	if ( selected.length > 0 ) {
+	    var confirm = "Are you sure you want to publish <strong>" + selected.length  + " items</strong> ?";
+	    bootbox.confirm(confirm, function(result) {
+		if (result == true) {
+		    for (s in selected) {
+			UnpublishedActions('publish', selected[s]['id'])
+		    }
+		};
+	    });
+	};
+    });
+    $("#toolbar-unpublished button[data-click=delete-bulk]").on("click", function(a) {
+	a.preventDefault();
+	var table = "#table-unpublished";
+	var selected = $(table).bootstrapTable('getAllSelections');
+	if ( selected.length > 0 ) {
+	    var confirm = "Are you sure you want to delete <strong>" + selected.length  + " items</strong> ?";
+	    bootbox.confirm(confirm, function(result) {
+		if (result == true) {
+		    for (s in selected) {
+			UnpublishedActions('delete', selected[s]['id'])
+		    }
+		};
+	    });
+	};
+    });    
 });

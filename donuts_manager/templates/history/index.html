@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}History{% endblock %}
+{% block title %}DoNutS - History{% endblock %}
 
 {% block main %}
 <div class="section-header" style="text-shadow: none !important;
@@ -40,6 +40,11 @@
 		table-condensed table-autosize">
     <thead>
       <tr>
+	<th data-valign="middle" data-align="center" data-field="id"
+	    data-halign="center" data-sortable="true" data-visible="false">
+	  <i class="fa fa-fw fa-list-ol"></i>
+	  ID
+	</th>
 	<th data-valign="middle" data-align="center" data-field="date"
 	    data-halign="center" data-sortable="true" data-formatter="HistoryFormatterDate">
 	  <i class="fa fa-fw fa-calendar"></i>
@@ -91,10 +96,9 @@
 {% endblock %}
 
 {% block js%}
-<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment.min.js"></script>
-
+{% include "__include__/moment.html" %}
+{% include "__include__/bootstrap-table.html" %}
 <script>
-{% include "js/common.js" %}
 {% include "history/index.js" %}
 {% include "history/modals/log.js" %}
 </script>

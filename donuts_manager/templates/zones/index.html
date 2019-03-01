@@ -16,15 +16,14 @@
 			    top: 50%;
 			    transform: translateY(-50%);
 			    width: 74%;">
-    <i class="fa fa-fw fa-list" aria-hidden="true"></i>
+    <i class="fa fa-fw fa-cubes" aria-hidden="true"></i>
     Zones
   </div>
 </div>
 <div class="section-content" style="position:relative;width:100%;height:93%;overflow-y:auto;padding:0% 1%;">
   <div id="toolbar-zones">
-    <button class="btn btn-primary" type="button"
-	    id="zone-add" aria-haspopup="true"
-	    aria-expanded="false">
+    <button class="btn btn-primary" type="button" data-click="zone-add"
+	    aria-haspopup="true" aria-expanded="false">
       <i class="fa fa-fw fa-plus"></i>
     </button>
   </div>
@@ -53,7 +52,7 @@
 	</th>
 	<th data-field="name" data-valign="middle"
 	    data-align="left" data-sortable="true"
-	    data-formatter="nameFormatter">
+	    data-formatter="ZonesFormatterName">
 	  <i class="fa fa-fw fa-list"></i>
 	  Name
 	</th>
@@ -67,11 +66,11 @@
 	  <i class="fa fa-fw fa-list"></i>
 	  Owner
 	</th>
-	<th data-field="published" data-valign="middle"
-	    data-align="center" data-sortable="true">
-	  <i class="fa fa-fw fa-list"></i>
-	  Changes
-	</th>
+	<th data-field="actions" data-align="center" 
+	    data-valign="middle"
+	    data-formatter="ZonesFormatterActions">
+          <i class="fa fa-fw fa-cog"></i>
+        </th>	
       </tr>
     </thead>
     <tbody></tbody>
@@ -79,17 +78,14 @@
 </div>
 {% endblock %}
 
-{% block modals %} 
-{% include "zones/modals/add_record.html" %}
-{% include "zones/modals/edit_record.html" %}
-{% include "zones/modals/expiration_modal.html" %}
+{% block modals %}
+{% include "zones/modals/zone.html" %}
 {% endblock%}
 
 {% block js %}
+{% include "__include__/bootstrap-table.html" %}
+{% include "__include__/bootstrap-select.html" %}
 <script>
-{% include "libs.js" %}
-{% include "js/common.js" %}
-{% include "zones/libs.js" %}
 {% include "zones/index.js" %}
 </script>
 {% endblock %}

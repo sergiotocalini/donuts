@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Administration: Users{% endblock %}
+
+{% block main %}
+<div class="section-header" style="text-shadow: none !important;
+				   height: 7%;
+				   width: 100%;
+				   position: relative;
+				   border-bottom: 1px solid #e7e7e7;">
+  <div class="title" style="float: left;
+			    font-size: 30px;
+			    margin: 0px;
+			    padding-left: 1%;
+			    position: relative;
+			    text-align: left;
+			    top: 50%;
+			    transform: translateY(-50%);
+			    width: 74%;">
+    <i class="fa fa-fw fa-users" aria-hidden="true"></i>
+    Administration: Users
+  </div>
+</div>
+<div class="section-content"
+     style="position:relative;width:100%;height:93%;overflow-y:auto;padding:0% 1%;">
+  <div id="toolbar-admin-users">
+    <button class="btn btn-primary" type="button" data-click="user-add"
+	    id="user-add" aria-haspopup="true" aria-expanded="false">
+      <i class="fa fa-fw fa-plus"></i>
+    </button>
+    <button class="btn btn-danger" type="button" data-click="user-del-bulk"
+	    id="user-del-bulk" aria-haspopup="true" aria-expanded="false">
+      <i class="fa fa-fw fa-trash"></i>
+    </button>    
+  </div>
+  <table id="table-admin-users"
+	 data-toolbar="#toolbar-admin-users"
+	 data-show-toggle="false" data-show-export="false"
+	 data-show-columns="true" data-show-multi-sort="true"
+	 data-sort-name="date" data-sort-order="desc"
+	 data-pagination="true" data-page-size="100"
+	 data-toggle="table" data-search="true" data-striped="true"
+	 data-show-footer="false"
+	 data-escape="false" data-maintain-selected="true"
+	 data-show-refresh="true"
+	 data-url="{{ url_for('api_admin_users') }}?"
+	 data-response-handler="AdminUsersResponseHandler"
+	 data-query-params="AdminUsersParams"
+	 data-side-pagination="client"
+	 data-show-header="true" data-reorderable-columns="true"
+	 class="table-hover table-striped table-compact table-responsive
+		table-condensed table-autosize">
+    <thead>
+      <tr>
+	<th data-field="select" data-visible="true"
+	    data-checkbox="true">
+	  <i class="fa fa-fw fa-check-square"></i>
+	</th>
+	<th data-valign="middle" data-align="center" data-field="id"
+	    data-halign="center" data-sortable="true" data-visible="false">
+	  <i class="fa fa-fw fa-list-ol"></i>
+	  ID
+	</th>	
+	<th data-valign="middle" data-align="left" data-field="display"
+	    data-halign="left" data-sortable="true"
+	    data-formatter="AdminUsersFormatterDisplay">
+	  <i class="fa fa-fw fa-user"></i>
+	  Display
+	</th>
+	<th data-valign="middle" data-align="left" data-field="email"
+	    data-halign="left" data-sortable="true">
+	  <i class="fa fa-fw fa-envelope"></i>
+	  Email
+	</th>
+	<th data-valign="middle" data-align="center"
+	    data-field="created_on" data-formatter="AdminUsersFormatterCreatedOn">
+	  <i class="fa fa-calendar fa-fw"></i>
+	  Created on
+	</th>
+	<th data-valign="middle" data-align="center"
+	    data-field="last_seen" data-formatter="AdminUsersFormatterLastSeen">
+	  <i class="fa fa-calendar fa-fw"></i>
+	  Last seen
+	</th>
+	<th data-field="action" data-valign="middle"
+	    data-align="center" data-sortable="true"
+	    data-formatter="AdminUsersFormatterActions">
+	  <i class="fa fa-fw fa-cog"></i>
+	</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block js%}
+{% include "__include__/bootstrap-table.html" %}
+<script>
+  {% include "admin/admin.js" %}
+  {% include "admin/users/index.js" %}
+</script>
+{% endblock%}
