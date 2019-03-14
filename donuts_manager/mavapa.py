@@ -31,6 +31,7 @@ def mavapa_code():
     data['client_id'] = current_app.config['CLIENT_ID']
     data['client_secret'] = current_app.config['CLIENT_SECRET']
     r = requests.post(url_token, data=data, verify=False)
+    print(r.text)
     data = json.loads(r.text)
     token = data['access_token']
     r = requests.get(url_userinfo + '?token=' + token, verify=False)

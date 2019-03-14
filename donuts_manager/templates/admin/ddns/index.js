@@ -47,7 +47,7 @@ function AdminDDNSActions(action, id) {
     }
 
     $.ajax({
-	url: "{{ url_for('api_ddns') }}?id=" + id,
+	url: "{{ url_for('api_admin_ddns') }}?id=" + id,
 	type: method,
 	data: data,
 	contentType: "application/json",

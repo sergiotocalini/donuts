@@ -1,4 +1,5 @@
-from donutslibs import crypt_request
+#!/usr/bin/env python
+from .donutslibs import crypt_request
 import datetime
 import dns.zone
 import dns.query
@@ -160,14 +161,14 @@ def get_all_zones(mongo_db, session, no_records=False, debug=False, no_cache=Fal
         return doc['data']
     data = {'request': 'show_zones'}
     data = execute_action(mongo_db, data, only_master=True, debug=debug)
-    print 'Print execute_action!'
+    print('Print execute_action!')
     pprint.pprint(data)
     print
                   
     zones = []
     azones = None
     user = mongo_db.users.find_one({'email': session['user']['email']})
-    print 'user'
+    print('user')
     pprint.pprint(user)
     if not user['admin']:
         azones = [x['name'] for x in user['zones']]
@@ -184,7 +185,7 @@ def get_all_zones(mongo_db, session, no_records=False, debug=False, no_cache=Fal
     cache_query['last_update'] = datetime.datetime.now()
     mongo_db.cache.save(cache_query)
     data['data']['cached'] = False
-    print 'data'
+    print('data')
     pprint.pprint(data)
     return data
 

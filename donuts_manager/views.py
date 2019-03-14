@@ -10,13 +10,12 @@ import pymongo
 from datetime import timedelta
 import datetime
 from functools import wraps
-from urllib2 import Request, urlopen, URLError
 from flask import Flask, request, render_template, jsonify
 from flask import url_for, abort, redirect, session
-from utils import execute_action, agent_call, get_records
-from utils import get_records_2, get_all_zones, get_all_zones_2, make_rnd_str, record_format
-from utils import MasterConnectionFail, SlaveConnectionFail
-from mavapa import mavapa, get_user_data
+from .utils import execute_action, agent_call, get_records
+from .utils import get_records_2, get_all_zones, get_all_zones_2, make_rnd_str, record_format
+from .utils import MasterConnectionFail, SlaveConnectionFail
+from .mavapa import mavapa, get_user_data
 from bson.objectid import ObjectId
 from datetime import datetime
 from IPy import IP
@@ -31,7 +30,8 @@ mongo_uri = 'mongodb://%s:%s@%s/%s' % (app.config['MONGO_USER'], app.config['MON
 mongo_client = MongoClient(mongo_uri)
 mongo_db = mongo_client[app.config['MONGO_DB']]
 
-if not app.config.has_key('CDN_LOCAL'):
+
+if 'CDN_LOCAL' not in app.config:
     app.config['CDN_LOCAL'] = '%s/static' %app.config.get('APPLICATION_ROOT', '')
 
 def login_required(f):
@@ -211,14 +211,8 @@ def inactive():
 
 @app.route('/admin/users')
 @login_required
-def admin_users(section, sub):
+def admin_users():
     return render_template('admin/users/index.html', ctx={'app_name': 'admin'})
-
-
-@app.route('/admin/user/<userid>', defaults={'userid': 'me'})
-@login_required
-def admin_user(userid):
-    return render_template('admin/user/index.html', ctx={'app_name': 'admin', 'id': userid})
 
 
 @app.route('/admin/user/old/')
@@ -226,7 +220,8 @@ def admin_user(userid):
 def edit_user():
     user_id = request.args.get('user_id', None)
     if user_id:
-        user = mongo_db.users.find_one({'id': user_id})
+        user = mongo_db.users.find_one({'_id': ObjectId(user_id)})
+        print(user)
         if user:
             data = get_all_zones(mongo_db, session, no_records=True)
             z = data['data']['zones']
@@ -243,7 +238,7 @@ def edit_user():
                 zones = z
             ctx={'user': user, 'zones': zones, 'app_name': 'admin'} 
             return render_template('admin/user/index.html', ctx=ctx)
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin_users'))
 
 
 @app.route('/admin/agents', methods=['GET', 'POST'])
@@ -466,6 +461,12 @@ def api_admin_users():
         if request.method == 'DELETE':
             if session['user']['admin']:
                 mongo_db.users.remove(doc)
+        elif request.method == 'PUT':
+            if session['user']['admin']:
+                mongo_db.users.save(doc)
+        elif request.method == 'POST':
+            if session['user']['admin']:
+                mongo_db.users.save(doc)
     else:
         abort(404)
     return jsonify(datetime=datetime.now())
@@ -855,7 +856,7 @@ def api_zones():
         try:
             data = get_all_zones_2(mongo_db, session, app=app)
         except Exception as e:
-            print e
+            print(e)
     return jsonify(data)
     
 
@@ -880,7 +881,7 @@ def show_zones():
         try:
             data = get_all_zones(mongo_db, session, app=app)
         except Exception as e:
-            print e
+            print(e)
     return jsonify(data)
 
 
@@ -936,7 +937,7 @@ def add_record():
         r = jsonify(errors)
         r.status_code = 400
         return r
-    print '#' * 80
+    print('#' * 80)
     pprint.pprint(data)
     if data['type'] == 'MX':
         data = parse_mx_record(data)
@@ -1042,9 +1043,9 @@ def remove_record():
 
     elif data['type'] == 'TXT':
         data = parse_txt(data)
-    print data
+    print(data)
     zone = data['zone']
-    #doc = mongo_db['to_publish'].find_one({'zone': zone})
+    # doc = mongo_db['to_publish'].find_one({'zone': zone})
     doc = {'zone': zone, 'actions': []}
     doc['actions'].append(data)
     doc['note'] = 'Removing record'
