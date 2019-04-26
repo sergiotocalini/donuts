@@ -75,7 +75,7 @@ def delete_user_cache(user):
 
 def update_user():
     mavapa_user = get_user_data(session)
-    if isinstance(mavapa_user, str) or isinstance(mavapa_user, unicode):
+    if isinstance(mavapa_user, str):
         mavapa_user = json.loads(mavapa_user)
     if not mavapa_user:
         return None
